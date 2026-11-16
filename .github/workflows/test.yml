@@ -1,0 +1,47 @@
+name: verify
+on: [push, pull_request]
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bootstrap full stack and seed
+        run: bash scripts/deploy.sh
+      - name: Verify ready
+        run: curl --fail http://localhost:8080/health/ready
+      - name: Critical behavior tests
+        run: docker compose exec -T app python -m unittest discover -s tests -v
+      - name: Real storage, worker and HTTP acceptance
+        run: docker compose exec -T app python scripts/smoke.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test dependencies
+        working-directory: frontend
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Generate a real browser upload fixture
+        run: |
+          docker compose exec -T app ffmpeg -hide_banner -loglevel error -y -f lavfi -i testsrc2=size=320x180:rate=24:duration=3 -f lavfi -i sine=frequency=440:duration=3 -c:v libx264 -pix_fmt yuv420p -c:a aac -movflags +faststart -shortest /tmp/e2e.mp4
+          docker compose cp app:/tmp/e2e.mp4 frontend/tests/fixture.mp4
+      - name: Browser acceptance and screenshots
+        working-directory: frontend
+        env:
+          BASE_URL: http://localhost:8080
+          E2E_VIDEO: tests/fixture.mp4
+        run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-verification
+          path: |
+            frontend/playwright-report
+            frontend/test-results
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+      - name: Stop stack
+        if: always()
+        run: docker compose down -v
