@@ -19,6 +19,7 @@ from . import config, models as m, schemas as s
 from .db import get_db, init_db
 from .security import current_user, require_user, require_staff, require_admin, hash_password, verify_password, issue_session
 from .storage import get_storage
+from .body_limit import BodyLimitMiddleware
 
 @asynccontextmanager
 async def lifespan(app):
@@ -28,6 +29,7 @@ async def lifespan(app):
 app = FastAPI(title='YouTube Clone API',version='1.0.0',lifespan=lifespan)
 # Per-process abuse protection; reverse proxy is expected to set a global rate limit.
 _auth_attempts = defaultdict(deque)
+app.add_middleware(BodyLimitMiddleware,max_bytes=config.MAX_UPLOAD_BYTES+1024*1024)
 @app.middleware('http')
 async def security_headers(request, call_next):
     if request.method not in ('GET','HEAD','OPTIONS'):
@@ -51,6 +53,8 @@ async def security_headers(request, call_next):
     response.headers['Referrer-Policy'] = 'same-origin'
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['Content-Security-Policy'] = "default-src 'self'; img-src 'self' data:; media-src 'self' blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+    if request.url.path in ('/docs','/redoc'):
+        response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: https://fastapi.tiangolo.com; connect-src 'self'; frame-ancestors 'none'"
     if request.url.path.startswith('/api'):
         response.headers['Cache-Control'] = 'no-store'
     return response
@@ -126,7 +130,7 @@ def videos(q:str='',channel_id:int|None=None,mine:bool=False,user=Depends(curren
     if channel_id is not None:
         statement=statement.where(m.Video.owner_id==channel_id)
     if q:
-        statement=statement.where(m.Video.title.ilike('%'+q.replace('%','\\%').replace('_','\\_')+'%',escape='\\'))
+        statement=statement.where(m.Video.title.ilike('%'+q.replace('\\','\\\\').replace('%','\\%').replace('_','\\_')+'%',escape='\\'))
     rows=db.scalars(statement.order_by(m.Video.created_at.desc()).limit(100)).all()
     return [video_json(db,v,user) for v in rows]
 @app.post('/api/videos',status_code=202)
@@ -134,6 +138,14 @@ def upload(file:UploadFile=File(...),title:str=Form(...),description:str=Form(''
     title=title.strip()
     if not title or len(title)>200 or len(description)>10000 or visibility not in ('public','private','unlisted'):
         raise HTTPException(422,'Invalid video metadata')
+    # Lock the owner row so concurrent requests cannot race the pending-job cap.
+    db.scalar(select(m.User).where(m.User.id==user.id).with_for_update())
+    pending=db.scalar(select(func.count()).select_from(m.Video).where(m.Video.owner_id==user.id,m.Video.status.in_(('uploaded','processing'))))
+    if pending>=3:
+        raise HTTPException(429,'Wait for pending videos to finish processing before uploading more')
+    total=db.scalar(select(func.count()).select_from(m.Video).where(m.Video.owner_id==user.id))
+    if total>=50:
+        raise HTTPException(409,'Account video limit reached; delete an existing video first')
     key='sources/'+uuid.uuid4().hex
     storage=get_storage()
     size=0

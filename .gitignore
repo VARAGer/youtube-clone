@@ -9,3 +9,5 @@ work/
 .DS_Store
 playwright-report/
 test-results/
+backups/
+frontend/tests/fixture.mp4

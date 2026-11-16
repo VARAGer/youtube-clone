@@ -36,7 +36,7 @@ def process_one():
             output=root/'video.mp4'
             thumbnail=root/'thumbnail.jpg'
             storage.download(source_key,source)
-            probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+            probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
             streams=[s for s in probe.get('streams',[]) if s.get('codec_type')=='video' and not s.get('disposition',{}).get('attached_pic')]
             if not streams:
                 raise ValueError('No playable video stream')
@@ -46,7 +46,7 @@ def process_one():
             if int(streams[0].get('width',0))*int(streams[0].get('height',0))>3840*2160:
                 raise ValueError('Video resolution exceeds 4K limit')
             # No shell interpolation, user paths, URLs, playlists or external protocols.
-            run(['ffmpeg','-nostdin','-v','error','-protocol_whitelist','file,pipe','-i',str(source),'-map','0:v:0','-map','0:a:0?','-sn','-dn','-map_metadata','-1','-vf','scale=1280:720:force_original_aspect_ratio=decrease:force_divisible_by=2','-c:v','libx264','-preset','veryfast','-crf','24','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-movflags','+faststart','-threads','2','-y',str(output)],1800)
+            run(['ffmpeg','-nostdin','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-i',str(source),'-map','0:v:0','-map','0:a:0?','-sn','-dn','-map_metadata','-1','-vf','scale=1280:720:force_original_aspect_ratio=decrease:force_divisible_by=2','-c:v','libx264','-preset','veryfast','-crf','24','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-movflags','+faststart','-threads','2','-y',str(output)],1800)
             run(['ffmpeg','-nostdin','-v','error','-ss',str(min(duration/2,5)),'-i',str(output),'-frames:v','1','-vf','scale=640:-2','-y',str(thumbnail)],60)
             media_key=f'media/{video_id}/video.mp4'
             thumbnail_key=f'media/{video_id}/thumbnail.jpg'
@@ -69,6 +69,12 @@ def process_one():
             storage.delete(source_key)
     except Exception as error:
         log.exception('Video processing failed for video %s',video_id)
+        try:
+            storage.delete(source_key)
+            storage.delete(f'media/{video_id}/video.mp4')
+            storage.delete(f'media/{video_id}/thumbnail.jpg')
+        except Exception:
+            log.exception('Failed to clean objects for video %s',video_id)
         with SessionLocal() as db:
             video=db.get(Video,video_id)
             job=db.get(Job,job_id)

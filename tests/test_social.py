@@ -89,3 +89,12 @@ class SocialTests(APITestCase):
         assert client.get(f"/api/videos/{vid}").status_code == 200
         assert client.delete(f"/api/videos/{vid}").status_code in (200, 204)
         assert client.get(f"/api/videos/{vid}").status_code == 404
+
+    def test_search_matches_literal_sql_wildcards(self):
+        owner = self.register(self.client)
+        for title in ("Save 50% now", "under_score", "path\\name", "ordinary title"):
+            self.ready_video(owner["id"], title=title)
+        for query, expected in (("%", "Save 50% now"), ("_", "under_score"), ("\\", "path\\name")):
+            response = self.client.get('/api/videos', params={'q': query})
+            assert response.status_code == 200, response.text
+            assert [video['title'] for video in response.json()] == [expected]
