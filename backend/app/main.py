@@ -379,7 +379,7 @@ def report_video(video_id:int,data:s.ReportInput,user=Depends(require_user),db:D
     return {'id':report.id}
 @app.get('/api/moderation/reports')
 def list_reports(user=Depends(require_staff),db:DBSession=Depends(get_db)):
-    return [{'id':r.id,'video_id':v.id,'title':v.title,'hidden':v.hidden,'reason':r.reason,'user_id':r.user_id,'created_at':r.created_at} for r,v in db.execute(select(m.Report,m.Video).join(m.Video,m.Report.video_id==m.Video.id).order_by(m.Report.created_at.desc()).limit(200))]
+    return [{'id':r.id,'video_id':v.id,'title':v.title if v.visibility!='private' or v.owner_id==user.id or db.get(m.Access,(v.id,user.id)) else 'Приватное видео','hidden':v.hidden,'reason':r.reason,'user_id':r.user_id,'created_at':r.created_at} for r,v in db.execute(select(m.Report,m.Video).join(m.Video,m.Report.video_id==m.Video.id).order_by(m.Report.created_at.desc()).limit(200))]
 @app.post('/api/moderation/videos/{video_id}/hide')
 def hide_video(video_id:int,data:s.HideInput,user=Depends(require_staff),db:DBSession=Depends(get_db)):
     video=db.get(m.Video,video_id)

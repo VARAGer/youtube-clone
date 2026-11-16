@@ -119,3 +119,22 @@ class VideoSecurityTests(APITestCase):
         with patch.object(LocalStorage, 'read', side_effect=FileNotFoundError('deleted')):
             response = self.client.get(f'/api/videos/{video_id}/media')
         assert response.status_code == 404
+
+
+    def test_moderation_reports_do_not_bypass_private_title_acl(self):
+        owner = self.register(self.client)
+        video_id = self.ready_video(owner['id'], title='Confidential private title')
+        assert self.client.post(f'/api/videos/{video_id}/reports', json={'reason': 'Review requested'}).status_code == 201
+        assert self.client.patch(f'/api/videos/{video_id}', json={'visibility': 'private'}).status_code == 200
+        for role in ('moderator', 'admin'):
+            staff = self.new_client()
+            account = self.register(staff, role)
+            self.set_role(account['id'], role)
+            def report_title():
+                return next(r['title'] for r in staff.get('/api/moderation/reports').json() if r['video_id'] == video_id)
+            assert report_title() == 'Приватное видео'
+            assert staff.get(f'/api/videos/{video_id}').status_code == 404
+            assert self.client.put(f'/api/videos/{video_id}/access', json={'email': account['email']}).status_code == 200
+            assert report_title() == 'Confidential private title'
+            assert self.client.delete(f"/api/videos/{video_id}/access/{account['id']}").status_code == 204
+            assert report_title() == 'Приватное видео'

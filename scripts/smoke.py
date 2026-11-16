@@ -91,6 +91,14 @@ def main():
             time.sleep(1)
         else:
             raise AssertionError('Worker did not complete within 120 seconds')
+        # The backing bucket remains private even for publicly playable videos.
+        for object_path in ('/', f'/media/{video_id}/video.mp4'):
+            url = os.environ['S3_ENDPOINT'].rstrip('/') + '/' + os.environ.get('S3_BUCKET', 'videos') + object_path
+            try:
+                with urllib.request.urlopen(url, timeout=20):
+                    raise AssertionError('Anonymous S3 access unexpectedly succeeded')
+            except urllib.error.HTTPError as error:
+                check(error.code == 403, f'Anonymous S3 access returned {error.code}, expected 403')
         full, headers = media(anon, f'/api/videos/{video_id}/media')
         check(len(full) > 100, 'MP4 payload is empty')
         first, headers = media(anon, f'/api/videos/{video_id}/media', 206, 'bytes=0-99')
@@ -110,6 +118,7 @@ def main():
         check(request(viewer, 'GET', f"/api/users/{owner_user['id']}")['subscribed'], 'Subscription failed')
         playlist = request(owner, 'POST', '/api/playlists', {'title': 'Acceptance ' + token})
         request(owner, 'PUT', f"/api/playlists/{playlist['id']}/videos/{video_id}")
+        request(viewer, 'POST', f'/api/videos/{video_id}/reports', {'reason': 'Acceptance moderation test'})
         request(owner, 'PATCH', f'/api/videos/{video_id}', {'visibility': 'private'})
         for opener in (anon, viewer):
             for suffix in ('', '/media', '/thumbnail', '/comments'):
@@ -118,6 +127,9 @@ def main():
         for opener in (moderator, admin):
             for suffix in ('', '/media', '/thumbnail', '/comments'):
                 denied(opener, f'/api/videos/{video_id}{suffix}')
+        for opener in (moderator, admin):
+            reports = request(opener, 'GET', '/api/moderation/reports')
+            check(next(r['title'] for r in reports if r['video_id'] == video_id) == 'Приватное видео', 'Moderation queue leaked private title')
         request(owner, 'PUT', f'/api/videos/{video_id}/access', {'email': viewer_user['email']})
         granted, _ = media(viewer, f'/api/videos/{video_id}/media', 206, 'bytes=0-99')
         check(granted == first, 'Granted viewer cannot read exact private media')
@@ -125,7 +137,6 @@ def main():
         for suffix in ('', '/media', '/thumbnail', '/comments'):
             denied(viewer, f'/api/videos/{video_id}{suffix}')
         request(owner, 'PATCH', f'/api/videos/{video_id}', {'visibility': 'public'})
-        request(viewer, 'POST', f'/api/videos/{video_id}/reports', {'reason': 'Acceptance moderation test'})
         rejected(viewer, 'POST', f'/api/moderation/videos/{video_id}/hide', 403, {'hidden': True})
         reports = request(moderator, 'GET', '/api/moderation/reports')
         check(any(r.get('video_id') == video_id for r in reports), 'Report absent from moderation queue')
