@@ -12,3 +12,6 @@ GET /playlists?channel_id= -> array {id,title,owner_id,videos:[]}; POST /playlis
 POST /videos/{id}/reports {reason}; GET /moderation/reports (staff); POST /moderation/videos/{id}/hide {hidden:bool}; PATCH /admin/users/{id}/role {role}; GET /admin/users.
 GET /health/live; GET /health/ready.
 All IDs integers. Inaccessible private/hidden/non-ready videos return 404 for unauthorized viewers. Owners may inspect processing/hidden metadata; hidden content is never playable. Private ACL independent of staff role.
+
+Moderation reports retain their ID/reason for the staff workflow, but redact
+private video titles for staff without owner/recipient access.

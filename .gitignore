@@ -11,3 +11,9 @@ playwright-report/
 test-results/
 backups/
 frontend/tests/fixture.mp4
+
+# Native session snapshots ship in the ZIP, not in commits.
+ai-sessions/*.jsonl
+ai-sessions/*.jsonl.zst
+ai-sessions/*.zip
+ai-sessions/manifest.json

@@ -1,0 +1,9 @@
+16
+fa249b2 fix: preserve Compose project isolation through sudo and automate restore checks
+/youtube-clean-app-1 project=youtube-clean
+/youtube-clean-db-1 project=youtube-clean
+/youtube-clone-app-1 project=youtube-clone
+youtube-clean_postgres project=youtube-clean
+youtube-clean_objects project=youtube-clean
+youtube-clone_postgres project=youtube-clone
+youtube-clone_objects project=youtube-clone

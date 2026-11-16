@@ -1,0 +1,6 @@
+/videos/ HTTP 403
+/videos/media/8/video.mp4 HTTP 403
+app Up About a minute (healthy)
+db Up About a minute (healthy)
+minio Up About a minute (healthy)
+worker Up 54 seconds

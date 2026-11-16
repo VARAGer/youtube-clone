@@ -1,0 +1,5 @@
+Client=29.10.0 Server=29.10.0
+Docker Compose version v5.7.1
+git version 2.43.0
+14
+9824408 fix: expose mobile role controls and verify final rendered screens

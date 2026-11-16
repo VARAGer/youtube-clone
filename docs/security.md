@@ -9,6 +9,8 @@
   never through registration input.
 * Each media and thumbnail request resolves the current session and current ACL.
   The S3 bucket is private; no long-lived public URLs or leaked internal keys.
+  Moderation reports redact private titles unless the staff member owns the video
+  or currently has a recipient grant.
 * Upload limits bound accepted data. ffprobe/ffmpeg validate the actual media;
   filename extensions and client MIME types do not establish trust.
 * ffmpeg runs without shell expansion; server-generated object paths prevent
@@ -32,9 +34,9 @@ multi-region disaster-recovery system. These are explicit scope limits, not
 implemented features. Application-level security tests do not replace a
 penetration test or host hardening.
 
-Native AI session files may include prompts and command outputs. The package
-script selects only sessions whose recorded working directory belongs to this
-project; it never bundles account auth/config files from the user's home.
+Native AI session files may include prompts and command outputs. Automatic package
+discovery selects sessions by project working directory; explicit continuation
+files are selected by exact native session ID; it it never bundles account auth/config files from the user's home.
 Generated secrets and local runtime stores are excluded from the submission.
 
 MinIO source release `RELEASE.2025-10-15T17-29-55Z` includes the upstream fix

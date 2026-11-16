@@ -1,0 +1,20 @@
+Mon Nov 16 16:51:43 UTC 2026
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+NAME="Ubuntu"
+VERSION_ID="24.04"
+VERSION="24.04.5 LTS (Noble Numbat)"
+VERSION_CODENAME=noble
+ID=ubuntu
+ID_LIKE=debian
+HOME_URL="https://www.ubuntu.com/"
+SUPPORT_URL="https://help.ubuntu.com/"
+BUG_REPORT_URL="https://bugs.launchpad.net/ubuntu/"
+PRIVACY_POLICY_URL="https://www.ubuntu.com/legal/terms-and-policies/privacy-policy"
+UBUNTU_CODENAME=noble
+LOGO=ubuntu-logo
+aarch64
+PASS: docker absent from PATH
+PASS: Docker packages not installed
+PASS: repository mount writable
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        19G  1.8G   17G  10% /

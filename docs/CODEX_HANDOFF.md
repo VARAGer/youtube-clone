@@ -1,5 +1,10 @@
 # Continue this project in Codex
 
+> Historical handoff checkpoint. The continuation executed real Docker,
+> PostgreSQL/S3/FFmpeg, browser and archive restore checks; current results and
+> remaining limitations are recorded in `docs/verification.md`. Keep the original
+> limitations below as historical context rather than current claims.
+
 This is a handoff note, not an original AI conversation export. It must never
 be represented as a substitute for native dialogue files required by the assignment.
 

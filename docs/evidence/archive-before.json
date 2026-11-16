@@ -1,0 +1,19 @@
+{
+  "counts": {
+    "audit_log": 0,
+    "comments": 3,
+    "jobs": 9,
+    "likes": 3,
+    "playlist_items": 4,
+    "playlists": 1,
+    "reports": 0,
+    "sessions": 2,
+    "subscriptions": 1,
+    "users": 4,
+    "video_access": 1,
+    "videos": 9
+  },
+  "media_bytes": 118537,
+  "media_sha256": "83d989e35e86e0082fbfa62ffbdcb2be1e7d3111cca981753901f61fa136763f",
+  "public_video_id": 1
+}

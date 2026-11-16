@@ -1,0 +1,7 @@
+PASS: PostgreSQL FOR UPDATE SKIP LOCKED skips a locked queue head
+PASS: parallel worker processes claim distinct jobs exactly once; real S3 H.264/JPEG outputs verified
+/app/scripts/integration_runtime.py:153: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, crashed[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: SIGKILL preserves processing claim; fresh lease excluded; expired lease reclaimed by restarted worker
+PASS: real ffprobe rejects malformed upload, cleans source and never publishes media
+CLEANUP: disposable schema and S3 bucket removed

@@ -1,0 +1,82 @@
+test_entrypoint_and_required_assets_are_served (test_application_assets.ApplicationAssetsTests.test_entrypoint_and_required_assets_are_served) ... ok
+test_liveness_and_local_readiness (test_application_assets.ApplicationAssetsTests.test_liveness_and_local_readiness) ... ok
+test_swagger_assets_allowed_and_openapi_describes_core_routes (test_application_assets.ApplicationAssetsTests.test_swagger_assets_allowed_and_openapi_describes_core_routes) ... ok
+test_auth_rate_limit_enforced (test_auth.AuthTests.test_auth_rate_limit_enforced) ... ok
+test_cross_origin_write_rejected (test_auth.AuthTests.test_cross_origin_write_rejected) ... /app/app/models.py:7: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return datetime.utcnow()
+/app/app/security.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.add(Session(token_hash=hashlib.sha256(token.encode()).hexdigest(),user_id=user.id,expires_at=datetime.utcnow()+timedelta(days=config.SESSION_DAYS)))
+ok
+test_duplicate_email_and_weak_password (test_auth.AuthTests.test_duplicate_email_and_weak_password) ... ok
+test_only_admin_changes_roles (test_auth.AuthTests.test_only_admin_changes_roles) ... /app/app/security.py:32: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  if not session or session.expires_at <= datetime.utcnow():
+ok
+test_registration_cannot_assign_staff_role (test_auth.AuthTests.test_registration_cannot_assign_staff_role) ... ok
+test_registration_login_logout_cookie_and_password (test_auth.AuthTests.test_registration_login_logout_cookie_and_password) ... ok
+test_staff_endpoints_reject_regular_users (test_auth.AuthTests.test_staff_endpoints_reject_regular_users) ... ok
+test_chunked_multipart_over_limit_returns_413 (test_body_limit.BodyLimitTests.test_chunked_multipart_over_limit_returns_413) ... ok
+test_json_route_has_small_separate_cap (test_body_limit.BodyLimitTests.test_json_route_has_small_separate_cap) ... ok
+test_oversized_declared_body_rejected_before_route (test_body_limit.BodyLimitTests.test_oversized_declared_body_rejected_before_route) ... ok
+test_likes_are_idempotent_and_comments_have_ownership (test_social.SocialTests.test_likes_are_idempotent_and_comments_have_ownership) ... ok
+test_playlists_do_not_disclose_private_or_hidden_items (test_social.SocialTests.test_playlists_do_not_disclose_private_or_hidden_items) ... ok
+test_processing_not_discoverable_and_delete_cascades (test_social.SocialTests.test_processing_not_discoverable_and_delete_cascades) ... ok
+test_search_matches_literal_sql_wildcards (test_social.SocialTests.test_search_matches_literal_sql_wildcards) ... ok
+test_subscription_idempotency (test_social.SocialTests.test_subscription_idempotency) ... ok
+test_missing_keys_match_filesystem_contract (test_storage.S3MissingObjectTests.test_missing_keys_match_filesystem_contract) ... ok
+test_s3_access_denied_is_not_misreported_as_missing (test_storage.S3MissingObjectTests.test_s3_access_denied_is_not_misreported_as_missing) ... ok
+test_object_keys_cannot_escape_storage_root (test_storage.StorageBoundaryTests.test_object_keys_cannot_escape_storage_root) ... ok
+test_deleted_video_during_processing_does_not_leave_published_objects (test_upload_lifecycle.UploadLifecycleTests.test_deleted_video_during_processing_does_not_leave_published_objects) ... /app/app/worker.py:18: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  cutoff=datetime.utcnow()-timedelta(minutes=35)
+/app/app/worker.py:26: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  job.claimed_at=datetime.utcnow()
+ok
+test_processor_failure_sets_failed_state_without_publishing (test_upload_lifecycle.UploadLifecycleTests.test_processor_failure_sets_failed_state_without_publishing) ... Video processing failed for video 1
+Traceback (most recent call last):
+  File "/app/app/worker.py", line 39, in process_one
+    probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+subprocess.CalledProcessError: Command '['ffprobe']' returned non-zero exit status 1.
+ok
+test_source_cleanup_failure_does_not_unpublish_successful_encode (test_upload_lifecycle.UploadLifecycleTests.test_source_cleanup_failure_does_not_unpublish_successful_encode) ... Failed to clean source for published video 1
+Traceback (most recent call last):
+  File "/app/app/worker.py", line 72, in process_one
+    storage.delete(source_key)
+  File "/app/tests/test_upload_lifecycle.py", line 117, in cleanup
+    raise OSError('temporary cleanup outage')
+OSError: temporary cleanup outage
+ok
+test_stale_processing_job_is_reclaimed_and_published_only_after_success (test_upload_lifecycle.UploadLifecycleTests.test_stale_processing_job_is_reclaimed_and_published_only_after_success) ... /app/tests/test_upload_lifecycle.py:64: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  job.claimed_at = datetime.utcnow() - timedelta(hours=1)
+ok
+test_streaming_upload_enforces_size_before_database_write (test_upload_lifecycle.UploadLifecycleTests.test_streaming_upload_enforces_size_before_database_write) ... ok
+test_upload_is_queued_and_source_is_never_streamed (test_upload_lifecycle.UploadLifecycleTests.test_upload_is_queued_and_source_is_never_streamed) ... ok
+test_hidden_video_never_streams_even_for_owner (test_video_security.VideoSecurityTests.test_hidden_video_never_streams_even_for_owner) ... ok
+test_media_range_semantics (test_video_security.VideoSecurityTests.test_media_range_semantics) ... ok
+test_media_removed_between_head_and_read_returns_404 (test_video_security.VideoSecurityTests.test_media_removed_between_head_and_read_returns_404) ... ok
+test_moderation_reports_do_not_bypass_private_title_acl (test_video_security.VideoSecurityTests.test_moderation_reports_do_not_bypass_private_title_acl) ... ok
+test_nonowners_cannot_edit_delete_grant_or_read_acl (test_video_security.VideoSecurityTests.test_nonowners_cannot_edit_delete_grant_or_read_acl) ... ok
+test_private_acl_does_not_implicitly_allow_staff (test_video_security.VideoSecurityTests.test_private_acl_does_not_implicitly_allow_staff) ... ok
+test_private_metadata_bytes_thumbnail_comments_and_list_protected (test_video_security.VideoSecurityTests.test_private_metadata_bytes_thumbnail_comments_and_list_protected) ... ok
+test_unlisted_is_watchable_but_not_searchable (test_video_security.VideoSecurityTests.test_unlisted_is_watchable_but_not_searchable) ... ok
+test_upload_rejects_empty_and_requires_auth (test_video_security.VideoSecurityTests.test_upload_rejects_empty_and_requires_auth) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 2.291s
+
+OK
+PASS: roles/update/demotion → malformed rejection → real PostgreSQL/S3/FFmpeg upload → playback/seek → like/comment → private grant/revoke → report/hide/unhide
+PASS: PostgreSQL FOR UPDATE SKIP LOCKED skips a locked queue head
+PASS: parallel worker processes claim distinct jobs exactly once; real S3 H.264/JPEG outputs verified
+/app/scripts/integration_runtime.py:153: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, crashed[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: SIGKILL preserves processing claim; fresh lease excluded; expired lease reclaimed by restarted worker
+PASS: real ffprobe rejects malformed upload, cleans source and never publishes media
+CLEANUP: disposable schema and S3 bucket removed

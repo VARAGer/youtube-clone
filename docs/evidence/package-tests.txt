@@ -1,0 +1,12 @@
+test_archive_preserves_all_commits_and_excludes_runtime_secrets (__main__.NativeExportTests.test_archive_preserves_all_commits_and_excludes_runtime_secrets) ... ok
+test_compressed_native_session_stays_compressed (__main__.NativeExportTests.test_compressed_native_session_stays_compressed) ... ok
+test_discovery_excludes_unrelated_chats (__main__.NativeExportTests.test_discovery_excludes_unrelated_chats) ... ok
+test_snapshots_preserve_native_bytes_and_original_extension (__main__.NativeExportTests.test_snapshots_preserve_native_bytes_and_original_extension) ... ok
+
+----------------------------------------------------------------------
+Ran 4 tests in 0.154s
+
+OK
+Archive: /private/var/folders/nn/cr6sxfc91lz7zjl82wk1vzdc0000gq/T/tmp2of8wiy0/submission.zip
+Native session/export files: 1; Git history included unchanged.
+Native files are byte-exact snapshots; their presence alone does not establish that every original conversation was exported.

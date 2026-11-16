@@ -56,3 +56,20 @@ To restore into a fresh deployment with the same `.env`:
 
 A backup is not proven until restored and inspected. Full restore testing must
 be recorded in `docs/verification.md` before claiming disaster recovery works.
+
+## Repeatable disposable restore check
+
+After deploying a separate extracted checkout as `youtube-archive`, run:
+
+```sh
+python3 scripts/verify_restore.py --checkout /absolute/extracted/youtube \
+  --project youtube-archive --protected-project youtube-clone \
+  --backup-dir /absolute/new-backup --evidence-dir /absolute/restore-evidence \
+  --disposable
+```
+
+The target must already be seeded. The checker requires dedicated project
+volumes, rejects shared or external mounts, backs up first, recreates only the
+disposable target, and compares every table count and a complete video's
+SHA-256. It then reruns smoke, API and runtime checks. Preserve that checkout's
+private `.env`; it is deliberately absent from the submission ZIP.

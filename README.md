@@ -61,6 +61,7 @@ PostgreSQL/S3/FFmpeg acceptance scenario:
 ```sh
 docker compose exec -T app python -m unittest discover -s tests -v
 docker compose exec -T app python scripts/smoke.py
+docker compose exec -T app python scripts/integration_runtime.py
 ```
 
 Browser tests exercise actual playback and capture desktop/mobile screenshots.
@@ -84,6 +85,10 @@ are saved in `frontend/test-results` and `frontend/playwright-report`.
 python3 scripts/package.py
 ```
 
+For an explicitly selected native continuation session whose working directory
+differs from this checkout, pass `--session-file /absolute/path/to/rollout.jsonl`
+(repeat for each agent). Native `.jsonl.zst` snapshots are also supported.
+
 The script preserves the complete `.git` directory and all commits, selects
 only project-native Codex JSONL session files, and excludes secrets/caches.
 If this ChatGPT Work session is not written to local Codex JSONL files, obtain
@@ -96,3 +101,9 @@ created with `--allow-missing-sessions`; it is explicitly incomplete.
 
 See the verification record for what was actually run. Do not infer successful
 Ubuntu deployment or browser playback merely from unit tests passing.
+
+The 2026-11-16 continuation includes real rendered evidence under `docs/evidence/`
+and native continuation session snapshots under `ai-sessions/` when packaged.
+The original pre-handoff dialogue export is unavailable; see
+`ai-sessions/README.md`. The presence of continuation snapshots does not mean
+that every original dialogue is included.
