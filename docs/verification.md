@@ -110,6 +110,12 @@ The complete pre-existing Git history is retained; no commits were rewritten.
    Unauthorized staff now see a neutral title; grant and revocation are covered
    by a new regression and real HTTP smoke scenario.
 
+The first GitHub Actions run passed deployment, API, smoke, packaging and
+PostgreSQL/worker checks, then failed before browser execution because
+Playwright 1.58.2 does not support the new Ubuntu 26.04 `ubuntu-latest` runner.
+CI now pins Ubuntu 24.04, matching the supported deployment environment.
+That first failed run is not counted as a successful browser check.
+
 Node 26 caused Playwright archive/teardown hangs in this environment; browser
 checks were rerun on Node 22, which the frontend tooling and CI now specify.
 The clean Ubuntu build was deliberately stopped once for host disk pressure;
