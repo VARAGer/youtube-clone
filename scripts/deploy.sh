@@ -43,6 +43,8 @@ DEMO_PASSWORD=$DEMO_SECRET
 ENV
 fi
 "${DOCKER[@]}" compose up -d --build --wait --wait-timeout 300
-"${DOCKER[@]}" compose --profile tools run --rm seed
+# The tools profile is excluded from compose up; rebuild seed as well so it
+# never runs an older app environment after a Dockerfile/dependency update.
+"${DOCKER[@]}" compose --profile tools run --rm --build seed
 printf '\nApplication: http://localhost:%s\nAPI docs: http://localhost:%s/docs\n' "${PORT:-8080}" "${PORT:-8080}"
 printf 'Demo accounts and the generated demo password are documented by the seed output and in .env.\n'
