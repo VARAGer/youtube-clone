@@ -1,0 +1,433 @@
+ Image youtube-finalzip-minio Building 
+ Image youtube-finalzip-app Building 
+ Image youtube-finalzip-worker Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 2.02kB done
+#1 DONE 0.0s
+
+#2 [minio internal] load build definition from minio.Dockerfile
+#2 transferring dockerfile: 917B done
+#2 DONE 0.0s
+
+#3 [worker internal] load build definition from Dockerfile
+#3 transferring dockerfile: 748B done
+#3 DONE 0.0s
+
+#4 [app internal] load metadata for docker.io/library/python:3.12-slim
+#4 ...
+
+#5 [minio internal] load metadata for docker.io/library/debian:bookworm-slim
+#5 DONE 1.7s
+
+#4 [worker internal] load metadata for docker.io/library/python:3.12-slim
+#4 DONE 1.7s
+
+#6 [minio internal] load .dockerignore
+#6 transferring context: 203B done
+#6 DONE 0.0s
+
+#7 [minio internal] load metadata for docker.io/library/golang:1.24.8-bookworm
+#7 DONE 1.7s
+
+#8 [minio stage-1 1/3] FROM docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc
+#8 resolve docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc 0.0s done
+#8 DONE 0.0s
+
+#9 [worker  1/10] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#9 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b 0.0s done
+#9 DONE 0.0s
+
+#10 [worker internal] load build context
+#10 transferring context: 192.51kB 0.0s done
+#10 DONE 0.0s
+
+#11 [minio builder 1/2] FROM docker.io/library/golang:1.24.8-bookworm@sha256:4ed690d6649d63c312b99a6120025ec79ce3b542968a37da53d6236c7c61a848
+#11 resolve docker.io/library/golang:1.24.8-bookworm@sha256:4ed690d6649d63c312b99a6120025ec79ce3b542968a37da53d6236c7c61a848 0.0s done
+#11 DONE 0.0s
+
+#12 [minio stage-1 2/3] RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/* && useradd -u 10001 -m minio && mkdir /data && chown minio:minio /data
+#12 CACHED
+
+#13 [minio builder 2/2] RUN go install -trimpath github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
+#13 CACHED
+
+#14 [minio stage-1 3/3] COPY --from=builder /out/minio /usr/local/bin/minio
+#14 CACHED
+
+#15 [app  2/10] RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg curl && rm -rf /var/lib/apt/lists/*
+#15 CACHED
+
+#16 [app  5/10] RUN pip install --no-cache-dir -r requirements.txt
+#16 CACHED
+
+#17 [app  3/10] WORKDIR /app
+#17 CACHED
+
+#18 [app  6/10] RUN groupadd -r youtube && useradd -r -g youtube -m youtube
+#18 CACHED
+
+#19 [app  7/10] COPY --chown=youtube:youtube backend/app /app/app
+#19 CACHED
+
+#20 [app  9/10] COPY --chown=youtube:youtube scripts /app/scripts
+#20 CACHED
+
+#21 [app  8/10] COPY --chown=youtube:youtube frontend /app/frontend
+#21 CACHED
+
+#22 [app  4/10] COPY backend/requirements.txt /app/requirements.txt
+#22 CACHED
+
+#23 [app 10/10] COPY --chown=youtube:youtube tests /app/tests
+#23 CACHED
+
+#24 [minio] exporting to image
+#24 exporting layers done
+#24 exporting manifest sha256:e86140df1d9352dabe60df41797e277aaed10522691d74defca71326ea221270 done
+#24 exporting config sha256:cc8f20054e29849c6b1ec5e6fa65427833ebe871afa8e08690b11ad83b44b791 done
+#24 exporting attestation manifest sha256:c80ce911f4eeb3125655a2960fcb2238cfb3f3243d4ddfa5590a21dbce0d4a3a done
+#24 exporting manifest list sha256:3a9599a9a2aa5269f197f9177d6385748765b358db9e4f2ac2d443e42602029f done
+#24 naming to docker.io/library/youtube-finalzip-minio:latest done
+#24 unpacking to docker.io/library/youtube-finalzip-minio:latest done
+#24 DONE 0.0s
+
+#25 [worker] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:935729991fc3eb6d06ce0cecba07fe0bacdbb783a042c4513f94800ac3aa3ab7 done
+#25 exporting config sha256:94084b8218e0f932986242eaf538f001657837493b2db6e5302619cbc7087deb done
+#25 exporting attestation manifest sha256:636080de3ab377e5bc83fc5c3d61305d23f7795014606b18f3fd910bfe52b9c3 done
+#25 exporting manifest list sha256:4d810a28adbef69d8e549be1e0c877ca97f37edaedd2a0fc88f0e81b4c21f595 done
+#25 naming to docker.io/library/youtube-finalzip-worker:latest done
+#25 unpacking to docker.io/library/youtube-finalzip-worker:latest done
+#25 DONE 0.0s
+
+#26 [app] exporting to image
+#26 exporting layers done
+#26 exporting manifest sha256:699e9c07c7daf669c8b3dab267b2dd30c25c106479b2b6a212ef2d51521e7945 done
+#26 exporting config sha256:fc74c5e77a3f616ce8abc61cd67994df707c68c8c5f60c0844c772949bce1c6e done
+#26 exporting attestation manifest sha256:ee3575bbcb7ab2298bfd84ea85d6311e48a10504df42d41cfbb9704de7881df7 done
+#26 exporting manifest list sha256:b463a2f0065ca220ab647b540efcfe2df1b2a9aa271293a3c0af822d1bcb3ed7 done
+#26 naming to docker.io/library/youtube-finalzip-app:latest done
+#26 unpacking to docker.io/library/youtube-finalzip-app:latest done
+#26 DONE 0.0s
+
+#27 [minio] resolving provenance for metadata file
+#27 DONE 0.0s
+
+#28 [worker] resolving provenance for metadata file
+#28 DONE 0.0s
+
+#29 [app] resolving provenance for metadata file
+#29 DONE 0.0s
+ Image youtube-finalzip-minio Built 
+ Image youtube-finalzip-app Built 
+ Image youtube-finalzip-worker Built 
+ Network youtube-finalzip_default Creating 
+ Volume youtube-finalzip_postgres Creating 
+ Volume youtube-finalzip_objects Creating 
+ Volume youtube-finalzip_postgres Created 
+ Volume youtube-finalzip_objects Created 
+ Network youtube-finalzip_default Created 
+ Container youtube-finalzip-minio-1 Creating 
+ Container youtube-finalzip-db-1 Creating 
+ Container youtube-finalzip-minio-1 Created 
+ Container youtube-finalzip-db-1 Created 
+ Container youtube-finalzip-app-1 Creating 
+ Container youtube-finalzip-app-1 Created 
+ Container youtube-finalzip-worker-1 Creating 
+ Container youtube-finalzip-worker-1 Created 
+ Container youtube-finalzip-db-1 Starting 
+ Container youtube-finalzip-minio-1 Starting 
+ Container youtube-finalzip-db-1 Started 
+ Container youtube-finalzip-db-1 Waiting 
+ Container youtube-finalzip-minio-1 Started 
+ Container youtube-finalzip-minio-1 Waiting 
+ Container youtube-finalzip-db-1 Healthy 
+ Container youtube-finalzip-minio-1 Healthy 
+ Container youtube-finalzip-app-1 Starting 
+ Container youtube-finalzip-app-1 Started 
+ Container youtube-finalzip-app-1 Waiting 
+ Container youtube-finalzip-app-1 Healthy 
+ Container youtube-finalzip-worker-1 Starting 
+ Container youtube-finalzip-worker-1 Started 
+ Container youtube-finalzip-worker-1 Waiting 
+ Container youtube-finalzip-db-1 Waiting 
+ Container youtube-finalzip-minio-1 Waiting 
+ Container youtube-finalzip-app-1 Waiting 
+ Container youtube-finalzip-minio-1 Healthy 
+ Container youtube-finalzip-worker-1 Healthy 
+ Container youtube-finalzip-db-1 Healthy 
+ Container youtube-finalzip-app-1 Healthy 
+ Image youtube-finalzip-minio Building 
+ Image youtube-finalzip-app Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.37kB done
+#1 DONE 0.0s
+
+#2 [app internal] load build definition from Dockerfile
+#2 transferring dockerfile: 748B done
+#2 DONE 0.0s
+
+#3 [minio internal] load build definition from minio.Dockerfile
+#3 transferring dockerfile: 917B done
+#3 DONE 0.0s
+
+#4 [app internal] load metadata for docker.io/library/python:3.12-slim
+#4 ...
+
+#5 [minio internal] load metadata for docker.io/library/debian:bookworm-slim
+#5 DONE 0.3s
+
+#4 [app internal] load metadata for docker.io/library/python:3.12-slim
+#4 DONE 0.3s
+
+#6 [minio internal] load metadata for docker.io/library/golang:1.24.8-bookworm
+#6 DONE 0.3s
+
+#7 [app internal] load .dockerignore
+#7 transferring context: 203B done
+#7 DONE 0.0s
+
+#8 [app internal] load build context
+#8 transferring context: 1.64kB done
+#8 DONE 0.0s
+
+#9 [app  1/10] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#9 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b 0.0s done
+#9 DONE 0.0s
+
+#10 [minio builder 1/2] FROM docker.io/library/golang:1.24.8-bookworm@sha256:4ed690d6649d63c312b99a6120025ec79ce3b542968a37da53d6236c7c61a848
+#10 resolve docker.io/library/golang:1.24.8-bookworm@sha256:4ed690d6649d63c312b99a6120025ec79ce3b542968a37da53d6236c7c61a848 0.0s done
+#10 DONE 0.0s
+
+#11 [app  6/10] RUN groupadd -r youtube && useradd -r -g youtube -m youtube
+#11 CACHED
+
+#12 [app  7/10] COPY --chown=youtube:youtube backend/app /app/app
+#12 CACHED
+
+#13 [app  8/10] COPY --chown=youtube:youtube frontend /app/frontend
+#13 CACHED
+
+#14 [app  2/10] RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg curl && rm -rf /var/lib/apt/lists/*
+#14 CACHED
+
+#15 [app  9/10] COPY --chown=youtube:youtube scripts /app/scripts
+#15 CACHED
+
+#16 [app  5/10] RUN pip install --no-cache-dir -r requirements.txt
+#16 CACHED
+
+#17 [app  3/10] WORKDIR /app
+#17 CACHED
+
+#18 [app  4/10] COPY backend/requirements.txt /app/requirements.txt
+#18 CACHED
+
+#19 [app 10/10] COPY --chown=youtube:youtube tests /app/tests
+#19 CACHED
+
+#20 [minio stage-1 1/3] FROM docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc
+#20 resolve docker.io/library/debian:bookworm-slim@sha256:734a72b3d6142a71993b4bc580ca01d8ca687f77a2c422d96a961d3376b179bc 0.0s done
+#20 DONE 0.0s
+
+#21 [minio builder 2/2] RUN go install -trimpath github.com/minio/minio@RELEASE.2025-10-15T17-29-55Z
+#21 CACHED
+
+#22 [minio stage-1 2/3] RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/* && useradd -u 10001 -m minio && mkdir /data && chown minio:minio /data
+#22 CACHED
+
+#23 [minio stage-1 3/3] COPY --from=builder /out/minio /usr/local/bin/minio
+#23 CACHED
+
+#24 [minio] exporting to image
+#24 exporting layers done
+#24 exporting manifest sha256:e86140df1d9352dabe60df41797e277aaed10522691d74defca71326ea221270 done
+#24 exporting config sha256:cc8f20054e29849c6b1ec5e6fa65427833ebe871afa8e08690b11ad83b44b791 done
+#24 exporting attestation manifest sha256:86b65410a2b3baecbf8d5ff09f319c28e50b34cae0a0f389c7e44dceb6a91c40 done
+#24 exporting manifest list sha256:393454300d31050e7917695448fed3ef60d2465fc3b7fb012177efd7408e7e5d done
+#24 naming to docker.io/library/youtube-finalzip-minio:latest done
+#24 unpacking to docker.io/library/youtube-finalzip-minio:latest done
+#24 DONE 0.0s
+
+#25 [app] exporting to image
+#25 exporting layers done
+#25 exporting manifest sha256:699e9c07c7daf669c8b3dab267b2dd30c25c106479b2b6a212ef2d51521e7945 done
+#25 exporting config sha256:fc74c5e77a3f616ce8abc61cd67994df707c68c8c5f60c0844c772949bce1c6e done
+#25 exporting attestation manifest sha256:2801c606c31b06244ea0a467b813f8fe94462d2a26e190b330721092daf80164 done
+#25 exporting manifest list sha256:416fae011821680bf7c67286db252067dcf54a228e826f4811b6de03950b69c3 done
+#25 naming to docker.io/library/youtube-finalzip-app:latest done
+#25 unpacking to docker.io/library/youtube-finalzip-app:latest done
+#25 DONE 0.0s
+
+#26 [minio] resolving provenance for metadata file
+#26 DONE 0.0s
+
+#27 [app] resolving provenance for metadata file
+#27 DONE 0.0s
+ Image youtube-finalzip-minio Built 
+ Image youtube-finalzip-app Built 
+ Container youtube-finalzip-app-1 Running 
+ Container youtube-finalzip-db-1 Running 
+ Container youtube-finalzip-minio-1 Running 
+ Container youtube-finalzip-minio-1 Waiting 
+ Container youtube-finalzip-db-1 Waiting 
+ Container youtube-finalzip-db-1 Healthy 
+ Container youtube-finalzip-minio-1 Healthy 
+ Image youtube-finalzip-seed Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 1.98kB done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 748B done
+#2 DONE 0.0s
+
+#3 [internal] load metadata for docker.io/library/python:3.12-slim
+#3 DONE 0.3s
+
+#4 [internal] load .dockerignore
+#4 transferring context: 203B done
+#4 DONE 0.0s
+
+#5 [ 1/10] FROM docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b
+#5 resolve docker.io/library/python:3.12-slim@sha256:5e2bdb1b0d542d5039cffb8181c65930093949194a65c365dfb1b0fe13a4fa5b 0.0s done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 transferring context: 1.64kB done
+#6 DONE 0.0s
+
+#7 [ 4/10] COPY backend/requirements.txt /app/requirements.txt
+#7 CACHED
+
+#8 [ 3/10] WORKDIR /app
+#8 CACHED
+
+#9 [ 6/10] RUN groupadd -r youtube && useradd -r -g youtube -m youtube
+#9 CACHED
+
+#10 [ 8/10] COPY --chown=youtube:youtube frontend /app/frontend
+#10 CACHED
+
+#11 [ 5/10] RUN pip install --no-cache-dir -r requirements.txt
+#11 CACHED
+
+#12 [ 9/10] COPY --chown=youtube:youtube scripts /app/scripts
+#12 CACHED
+
+#13 [ 2/10] RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg curl && rm -rf /var/lib/apt/lists/*
+#13 CACHED
+
+#14 [ 7/10] COPY --chown=youtube:youtube backend/app /app/app
+#14 CACHED
+
+#15 [10/10] COPY --chown=youtube:youtube tests /app/tests
+#15 CACHED
+
+#16 exporting to image
+#16 exporting layers done
+#16 exporting manifest sha256:58501ba196e039c768a69e3c57428ae21eab7b1fc4d90dd36e0eb88cb3fd079d done
+#16 exporting config sha256:d382c6301051b124e279c3b7a0be0f70ef64ca4b248cc2c6d79fc9427dc61bcd done
+#16 exporting attestation manifest sha256:c3b2d195e013a1131bbc75c541105d0664af7d0bbdfd981c1e862a499755c394 done
+#16 exporting manifest list sha256:8f3abfe3ebae46f7b582b159a50cd2a310026516c7d4dd0103b23039cb083036 done
+#16 naming to docker.io/library/youtube-finalzip-seed:latest done
+#16 unpacking to docker.io/library/youtube-finalzip-seed:latest done
+#16 DONE 0.0s
+
+#17 resolving provenance for metadata file
+#17 DONE 0.0s
+ Image youtube-finalzip-seed Built 
+ Container youtube-finalzip-app-1 Waiting 
+ Container youtube-finalzip-app-1 Healthy 
+ Container youtube-finalzip-seed-run-867940b0b281 Creating 
+ Container youtube-finalzip-seed-run-867940b0b281 Created 
+Demo is ready. Accounts: creator@demo.local, viewer@demo.local, moderator@demo.local, admin@demo.local
+Password: use DEMO_PASSWORD from your private .env file.
+viewer@demo.local is explicitly allowed to view the private preview.
+
+Application: http://localhost:18084
+API docs: http://localhost:18084/docs
+Demo accounts and the generated demo password are documented by the seed output and in .env.
+test_entrypoint_and_required_assets_are_served (test_application_assets.ApplicationAssetsTests.test_entrypoint_and_required_assets_are_served) ... ok
+test_liveness_and_local_readiness (test_application_assets.ApplicationAssetsTests.test_liveness_and_local_readiness) ... ok
+test_swagger_assets_allowed_and_openapi_describes_core_routes (test_application_assets.ApplicationAssetsTests.test_swagger_assets_allowed_and_openapi_describes_core_routes) ... ok
+test_auth_rate_limit_enforced (test_auth.AuthTests.test_auth_rate_limit_enforced) ... ok
+test_cross_origin_write_rejected (test_auth.AuthTests.test_cross_origin_write_rejected) ... /app/app/models.py:7: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  return datetime.utcnow()
+/app/app/security.py:24: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.add(Session(token_hash=hashlib.sha256(token.encode()).hexdigest(),user_id=user.id,expires_at=datetime.utcnow()+timedelta(days=config.SESSION_DAYS)))
+ok
+test_duplicate_email_and_weak_password (test_auth.AuthTests.test_duplicate_email_and_weak_password) ... ok
+test_only_admin_changes_roles (test_auth.AuthTests.test_only_admin_changes_roles) ... /app/app/security.py:32: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  if not session or session.expires_at <= datetime.utcnow():
+ok
+test_registration_cannot_assign_staff_role (test_auth.AuthTests.test_registration_cannot_assign_staff_role) ... ok
+test_registration_login_logout_cookie_and_password (test_auth.AuthTests.test_registration_login_logout_cookie_and_password) ... ok
+test_staff_endpoints_reject_regular_users (test_auth.AuthTests.test_staff_endpoints_reject_regular_users) ... ok
+test_chunked_multipart_over_limit_returns_413 (test_body_limit.BodyLimitTests.test_chunked_multipart_over_limit_returns_413) ... ok
+test_json_route_has_small_separate_cap (test_body_limit.BodyLimitTests.test_json_route_has_small_separate_cap) ... ok
+test_oversized_declared_body_rejected_before_route (test_body_limit.BodyLimitTests.test_oversized_declared_body_rejected_before_route) ... ok
+test_likes_are_idempotent_and_comments_have_ownership (test_social.SocialTests.test_likes_are_idempotent_and_comments_have_ownership) ... ok
+test_playlists_do_not_disclose_private_or_hidden_items (test_social.SocialTests.test_playlists_do_not_disclose_private_or_hidden_items) ... ok
+test_processing_not_discoverable_and_delete_cascades (test_social.SocialTests.test_processing_not_discoverable_and_delete_cascades) ... ok
+test_search_matches_literal_sql_wildcards (test_social.SocialTests.test_search_matches_literal_sql_wildcards) ... ok
+test_subscription_idempotency (test_social.SocialTests.test_subscription_idempotency) ... ok
+test_missing_keys_match_filesystem_contract (test_storage.S3MissingObjectTests.test_missing_keys_match_filesystem_contract) ... ok
+test_s3_access_denied_is_not_misreported_as_missing (test_storage.S3MissingObjectTests.test_s3_access_denied_is_not_misreported_as_missing) ... ok
+test_object_keys_cannot_escape_storage_root (test_storage.StorageBoundaryTests.test_object_keys_cannot_escape_storage_root) ... ok
+test_deleted_video_during_processing_does_not_leave_published_objects (test_upload_lifecycle.UploadLifecycleTests.test_deleted_video_during_processing_does_not_leave_published_objects) ... /app/app/worker.py:18: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  cutoff=datetime.utcnow()-timedelta(minutes=35)
+/app/app/worker.py:26: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  job.claimed_at=datetime.utcnow()
+ok
+test_processor_failure_sets_failed_state_without_publishing (test_upload_lifecycle.UploadLifecycleTests.test_processor_failure_sets_failed_state_without_publishing) ... Video processing failed for video 1
+Traceback (most recent call last):
+  File "/app/app/worker.py", line 39, in process_one
+    probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1139, in __call__
+    return self._mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1143, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/unittest/mock.py", line 1198, in _execute_mock_call
+    raise effect
+subprocess.CalledProcessError: Command '['ffprobe']' returned non-zero exit status 1.
+ok
+test_source_cleanup_failure_does_not_unpublish_successful_encode (test_upload_lifecycle.UploadLifecycleTests.test_source_cleanup_failure_does_not_unpublish_successful_encode) ... Failed to clean source for published video 1
+Traceback (most recent call last):
+  File "/app/app/worker.py", line 72, in process_one
+    storage.delete(source_key)
+  File "/app/tests/test_upload_lifecycle.py", line 117, in cleanup
+    raise OSError('temporary cleanup outage')
+OSError: temporary cleanup outage
+ok
+test_stale_processing_job_is_reclaimed_and_published_only_after_success (test_upload_lifecycle.UploadLifecycleTests.test_stale_processing_job_is_reclaimed_and_published_only_after_success) ... /app/tests/test_upload_lifecycle.py:64: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  job.claimed_at = datetime.utcnow() - timedelta(hours=1)
+ok
+test_streaming_upload_enforces_size_before_database_write (test_upload_lifecycle.UploadLifecycleTests.test_streaming_upload_enforces_size_before_database_write) ... ok
+test_upload_is_queued_and_source_is_never_streamed (test_upload_lifecycle.UploadLifecycleTests.test_upload_is_queued_and_source_is_never_streamed) ... ok
+test_hidden_video_never_streams_even_for_owner (test_video_security.VideoSecurityTests.test_hidden_video_never_streams_even_for_owner) ... ok
+test_media_range_semantics (test_video_security.VideoSecurityTests.test_media_range_semantics) ... ok
+test_media_removed_between_head_and_read_returns_404 (test_video_security.VideoSecurityTests.test_media_removed_between_head_and_read_returns_404) ... ok
+test_moderation_reports_do_not_bypass_private_title_acl (test_video_security.VideoSecurityTests.test_moderation_reports_do_not_bypass_private_title_acl) ... ok
+test_nonowners_cannot_edit_delete_grant_or_read_acl (test_video_security.VideoSecurityTests.test_nonowners_cannot_edit_delete_grant_or_read_acl) ... ok
+test_private_acl_does_not_implicitly_allow_staff (test_video_security.VideoSecurityTests.test_private_acl_does_not_implicitly_allow_staff) ... ok
+test_private_metadata_bytes_thumbnail_comments_and_list_protected (test_video_security.VideoSecurityTests.test_private_metadata_bytes_thumbnail_comments_and_list_protected) ... ok
+test_unlisted_is_watchable_but_not_searchable (test_video_security.VideoSecurityTests.test_unlisted_is_watchable_but_not_searchable) ... ok
+test_upload_rejects_empty_and_requires_auth (test_video_security.VideoSecurityTests.test_upload_rejects_empty_and_requires_auth) ... ok
+
+----------------------------------------------------------------------
+Ran 36 tests in 2.861s
+
+OK
+PASS: roles/update/demotion → malformed rejection → real PostgreSQL/S3/FFmpeg upload → playback/seek → like/comment → private grant/revoke → report/hide/unhide
+PASS: PostgreSQL FOR UPDATE SKIP LOCKED skips a locked queue head
+PASS: parallel worker processes claim distinct jobs exactly once; real S3 H.264/JPEG outputs verified
+/app/scripts/integration_runtime.py:153: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, crashed[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: SIGKILL preserves processing claim; fresh lease excluded; expired lease reclaimed by restarted worker
+PASS: real ffprobe rejects malformed upload, cleans source and never publishes media
+CLEANUP: disposable schema and S3 bucket removed

@@ -58,9 +58,10 @@ separate requirement from application verification.
 - [x] Portable `scripts/verify_restore.py` executed with its project/volume
       guards, explicit disposable target, fresh-volume restore and follow-up
       checks; evidence is under `docs/evidence/restore-harness/`.
-- [x] Four packaging regressions: unrelated session exclusion, exact native byte
+- [x] Five packaging regressions: unrelated session exclusion, exact native byte
       preservation, compressed native files, complete Git history and secret
-      exclusion after ZIP extraction. Git integrity checked with `git fsck`.
+      exclusion after ZIP extraction, and refusal to count a generated provenance
+      manifest as a native dialogue. Git integrity checked with `git fsck`.
 - [x] Runtime/source snapshot `fa249b2` deployed from an extracted ZIP on the
       clean Ubuntu VM; all original commits are ancestors and Git integrity
       passed. Final packaging integrity and native hashes are checked separately.
@@ -77,6 +78,12 @@ redaction in moderation reports. All isolated PostgreSQL/S3/FFmpeg concurrency,
 recovery and malformed-input checks passed. Browser acceptance against that
 same deployment: **3 passed in 19.6 seconds**. GPT-6 Luna inspected its seven
 final PNGs with no critical or noticeable cosmetic findings.
+
+The complete submission ZIP was also extracted into a separate checkout and
+deployed as `youtube-finalzip`: 36 API tests, smoke and runtime checks passed
+again (`docs/evidence/final-zip-deploy-test.txt`). Native files are collected
+unchanged in the ZIP with their SHA-256 manifest; the original conversation
+remains unavailable.
 
 Documentation, evidence, session provenance and packaging metadata can follow
 this runtime/source commit without changing the tested application code.

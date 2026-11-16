@@ -1,5 +1,14 @@
 # YouTube clone
 
+Source: [https://github.com/VARAGer/youtube-clone](https://github.com/VARAGer/youtube-clone).
+
+Verified on clean Ubuntu 24.04: **36 API tests**, **3 real browser scenarios**,
+PostgreSQL/S3/FFmpeg lifecycle and concurrency checks, and a complete
+backup/restore with matching database counts and video SHA-256.
+See [the executed verification record](docs/verification.md) for scope and evidence.
+
+![Desktop feed](docs/evidence/screenshots/home-desktop.png)
+
 FastAPI + PostgreSQL + private S3-compatible object storage, a separate FFmpeg
 worker, and a responsive same-origin frontend. The implementation includes a
 video feed, watch page with seeking, search, channels, subscriptions, playlists,
