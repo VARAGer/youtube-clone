@@ -16,6 +16,13 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 NATIVE_SUFFIXES = ('.jsonl', '.jsonl.zst', '.json', '.zip')
+# Generated provenance belongs in the ZIP, but is never a dialogue export.
+RESERVED_METADATA_NAMES = {'manifest.json'}
+
+
+def is_native_export_file(path):
+    return (path.is_file() and path.name.casefold() not in RESERVED_METADATA_NAMES
+            and path.name.endswith(NATIVE_SUFFIXES))
 
 
 @contextmanager
@@ -52,6 +59,8 @@ def session_metadata(path):
 
 
 def project_session(path):
+    if not is_native_export_file(path):
+        return False
     metadata = session_metadata(path)
     if not metadata or not metadata.get('cwd'):
         return False
@@ -88,13 +97,13 @@ def main():
         candidates = sorted(args.session_root.rglob('*.jsonl')) + sorted(args.session_root.rglob('*.jsonl.zst'))
     sessions = [p for p in candidates if project_session(p)]
     for source in args.session_file:
-        if not source.is_file() or not session_metadata(source):
+        if not is_native_export_file(source) or not session_metadata(source):
             raise SystemExit(f'Native Codex session metadata missing: {source}')
     for export in args.native_export:
-        if not export.is_file() or not export.name.endswith(NATIVE_SUFFIXES):
-            raise SystemExit(f'Native export must be an existing JSON/JSONL/JSONL.zst/ZIP: {export}')
+        if not is_native_export_file(export):
+            raise SystemExit(f'Native export must be an existing dialogue JSON/JSONL/JSONL.zst/ZIP; manifest.json is reserved generated metadata: {export}')
     target = ROOT / 'ai-sessions'
-    existing = [p for p in target.glob('*') if p.is_file() and p.name.endswith(NATIVE_SUFFIXES)]
+    existing = [p for p in target.glob('*') if is_native_export_file(p)]
     sources = sessions + args.session_file + args.native_export
     if not sources and not existing and not args.allow_missing_sessions:
         raise SystemExit('No native project sessions found. Export this task from its AI tool and rerun with --session-root or --session-file. Refusing to label an incomplete submission complete.')
@@ -115,7 +124,7 @@ def main():
                 continue
             archive.write(path, Path('youtube') / relative)
     print(f'Archive: {output}')
-    print(f'Native session/export files: {len([p for p in target.iterdir() if p.is_file() and p.name.endswith(NATIVE_SUFFIXES)])}; Git history included unchanged.')
+    print(f'Native session/export files: {len([p for p in target.iterdir() if is_native_export_file(p)])}; Git history included unchanged.')
     print('Native files are byte-exact snapshots; their presence alone does not establish that every original conversation was exported.')
     if not sources and not existing:
         print('INCOMPLETE: native AI sessions are missing.')

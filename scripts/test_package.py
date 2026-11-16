@@ -1,5 +1,7 @@
 """Regression checks for byte-preserving native session selection/packaging."""
+from contextlib import redirect_stdout
 import importlib.util
+import io
 import json
 from pathlib import Path
 import shutil
@@ -46,6 +48,28 @@ class NativeExportTests(unittest.TestCase):
         self.assertEqual(second.read_bytes(), source.read_bytes())
         self.assertEqual(package.copy_snapshot(source, target), second)
 
+    def test_generated_manifest_alone_cannot_satisfy_native_export_requirement(self):
+        repo = self.root / 'repository'
+        sessions = repo / 'ai-sessions'
+        sessions.mkdir(parents=True)
+        manifest = sessions / 'manifest.json'
+        manifest.write_text(json.dumps({'files': [], 'kind': 'generated provenance'}) + '\n')
+        original = manifest.read_bytes()
+        output = self.root / 'submission.zip'
+        with patch.object(package, 'ROOT', repo), patch('sys.argv', [
+            'package.py', '--session-root', str(self.root / 'absent'), '--output', str(output)
+        ]), self.assertRaisesRegex(SystemExit, 'No native project sessions found'):
+            package.main()
+        self.assertFalse(output.exists())
+        self.assertEqual(manifest.read_bytes(), original)
+        # Supplying the same generated file explicitly cannot bypass the guard.
+        with patch.object(package, 'ROOT', repo), patch('sys.argv', [
+            'package.py', '--session-root', str(self.root / 'absent'),
+            '--native-export', str(manifest), '--output', str(output)
+        ]), self.assertRaisesRegex(SystemExit, 'Native export must be'):
+            package.main()
+        self.assertFalse(output.exists())
+
     def test_archive_preserves_all_commits_and_excludes_runtime_secrets(self):
         repo = self.root / 'repository'
         repo.mkdir()
@@ -62,15 +86,21 @@ class NativeExportTests(unittest.TestCase):
         second = git('rev-parse', 'HEAD').strip()
         (repo / '.env').write_text('SECRET=never package runtime secrets')
         source = self.native(repo)
+        sessions = repo / 'ai-sessions'
+        sessions.mkdir()
+        (sessions / 'manifest.json').write_text(json.dumps({'kind': 'generated provenance'}))
+        summary = io.StringIO()
         output = self.root / 'submission.zip'
-        with patch.object(package, 'ROOT', repo), patch('sys.argv', [
+        with redirect_stdout(summary), patch.object(package, 'ROOT', repo), patch('sys.argv', [
             'package.py', '--session-root', str(self.root / 'absent'),
             '--session-file', str(source), '--output', str(output)
         ]):
             package.main()
+        self.assertIn('Native session/export files: 1;', summary.getvalue())
         extracted = self.root / 'extracted'
         with zipfile.ZipFile(output) as archive:
             self.assertNotIn('youtube/.env', archive.namelist())
+            self.assertIn('youtube/ai-sessions/manifest.json', archive.namelist())
             self.assertEqual(archive.read('youtube/ai-sessions/session.jsonl'), source.read_bytes())
             archive.extractall(extracted)
         history = subprocess.check_output(['git', 'log', '--format=%H'], cwd=extracted / 'youtube').splitlines()
