@@ -1,0 +1,11 @@
+.env
+.venv/
+__pycache__/
+.pytest_cache/
+node_modules/
+work/
+*.pyc
+*.log
+.DS_Store
+playwright-report/
+test-results/
