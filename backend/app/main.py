@@ -223,7 +223,11 @@ def serve_object(video_id,kind,request,user,db):
         if start>=total or start>end:
             raise HTTPException(416,'Unsatisfiable byte range',headers={'Content-Range':f'bytes */{total}'})
         status=206
-    obj=storage.read(key,start,end)
+    try:
+        obj=storage.read(key,start,end)
+    except (FileNotFoundError,KeyError):
+        # Deletion may race the metadata lookup or object HEAD request.
+        raise HTTPException(404,'Media not found')
     def chunks():
         remaining=end-start+1
         try:

@@ -66,7 +66,12 @@ def process_one():
                 else:
                     storage.delete(media_key)
                     storage.delete(thumbnail_key)
-            storage.delete(source_key)
+            # Once the publication transaction succeeds, a cleanup outage must
+            # not turn a playable video into a failure and delete its outputs.
+            try:
+                storage.delete(source_key)
+            except Exception:
+                log.exception('Failed to clean source for published video %s',video_id)
     except Exception as error:
         log.exception('Video processing failed for video %s',video_id)
         try:

@@ -44,15 +44,29 @@ class S3Storage:
     def put_file(self,key,path,content_type='application/octet-stream'):
         self.client.upload_file(str(path),config.S3_BUCKET,key,ExtraArgs={'ContentType':content_type})
     def download(self,key,path):
-        self.client.download_file(config.S3_BUCKET,key,str(path))
+        try:
+            self.client.download_file(config.S3_BUCKET,key,str(path))
+        except ClientError as error:
+            self._missing_object(error, key)
     def size(self,key):
-        return self.client.head_object(Bucket=config.S3_BUCKET,Key=key)['ContentLength']
+        try:
+            return self.client.head_object(Bucket=config.S3_BUCKET,Key=key)['ContentLength']
+        except ClientError as error:
+            self._missing_object(error, key)
     def read(self,key,start=None,end=None):
         args = {'Bucket':config.S3_BUCKET,'Key':key}
         if start is not None:
             args['Range'] = f'bytes={start}-{end if end is not None else ""}'
-        response = self.client.get_object(**args)
+        try:
+            response = self.client.get_object(**args)
+        except ClientError as error:
+            self._missing_object(error, key)
         return {'body':response['Body'],'length':response['ContentLength'],'content_type':response.get('ContentType','application/octet-stream')}
+    @staticmethod
+    def _missing_object(error, key):
+        if error.response.get('Error', {}).get('Code') in ('404', 'NoSuchKey', 'NotFound'):
+            raise FileNotFoundError(key) from error
+        raise error
     def delete(self,key):
         self.client.delete_object(Bucket=config.S3_BUCKET,Key=key)
 def get_storage():

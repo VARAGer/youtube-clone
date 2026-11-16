@@ -110,3 +110,12 @@ class VideoSecurityTests(APITestCase):
         assert client.post("/api/videos", data=payload, files={"file": ("test.mp4", b"bad", "video/mp4")}).status_code == 401
         register(client)
         assert client.post("/api/videos", data=payload, files={"file": ("empty.mp4", b"", "video/mp4")}).status_code in (400, 415, 422)
+
+    def test_media_removed_between_head_and_read_returns_404(self):
+        from unittest.mock import patch
+        from app.storage import LocalStorage
+        owner = self.register(self.client)
+        video_id = self.ready_video(owner['id'])
+        with patch.object(LocalStorage, 'read', side_effect=FileNotFoundError('deleted')):
+            response = self.client.get(f'/api/videos/{video_id}/media')
+        assert response.status_code == 404

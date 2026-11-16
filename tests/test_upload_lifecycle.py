@@ -103,3 +103,27 @@ class UploadLifecycleTests(APITestCase):
         assert not storage.path(f'media/{video_id}/thumbnail.jpg').exists()
         with SessionLocal() as db:
             assert db.scalar(select(Job).where(Job.video_id == video_id)) is None
+
+    def test_source_cleanup_failure_does_not_unpublish_successful_encode(self):
+        from pathlib import Path
+        from app.worker import process_one
+        from app.storage import LocalStorage
+        self.register(self.client)
+        response = self.client.post('/api/videos', data={'title': 'Cleanup outage'}, files={'file': ('v.mp4', b'source', 'video/mp4')})
+        video_id = response.json()['id']
+        original_delete = LocalStorage.delete
+        def cleanup(storage, key):
+            if key.startswith('sources/'):
+                raise OSError('temporary cleanup outage')
+            return original_delete(storage, key)
+        def fake_encoder(command, timeout):
+            if command[0] == 'ffprobe':
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+            Path(command[-1]).write_bytes(b'encoded-fixture')
+            return subprocess.CompletedProcess(command, 0, stdout='')
+        with patch('app.worker.run', side_effect=fake_encoder), patch.object(LocalStorage, 'delete', cleanup):
+            assert process_one() is True
+        with SessionLocal() as db:
+            assert db.get(Video, video_id).status == 'ready'
+            assert db.scalar(select(Job).where(Job.video_id == video_id)).status == 'done'
+        assert self.client.get(f'/api/videos/{video_id}/media').content == b'encoded-fixture'
