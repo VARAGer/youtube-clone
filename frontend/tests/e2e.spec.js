@@ -41,6 +41,10 @@ test('registration → upload → playback → like/comment → privacy and chan
     expect(await page.locator('video').evaluate(v=>v.duration)).toBeGreaterThan(2);
     await page.locator('video').evaluate(v=>{v.muted=true;return v.play();});
     await expect.poll(()=>page.locator('video').evaluate(v=>v.currentTime)).toBeGreaterThan(0);
+    await page.locator('video').evaluate(v=>{v.pause();v.currentTime=1.8;});
+    await expect.poll(()=>page.locator('video').evaluate(v=>!v.seeking&&v.currentTime>=1.7)).toBe(true);
+    await page.locator('video').evaluate(v=>v.play());
+    await expect.poll(()=>page.locator('video').evaluate(v=>v.currentTime)).toBeGreaterThan(1.9);
     const like=page.locator('.like-btn');await like.click();await expect(like).toHaveClass(/liked/);await expect(like).toContainText('1');
     await page.getByLabel('Комментарий',{exact:true}).fill('Browser verified comment <script>alert(1)</script>');
     await page.getByRole('button',{name:'Отправить',exact:true}).click();

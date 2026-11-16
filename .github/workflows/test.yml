@@ -10,6 +10,8 @@ jobs:
         run: bash scripts/deploy.sh
       - name: Verify ready
         run: curl --fail http://localhost:8080/health/ready
+      - name: Native export packaging regressions
+        run: python3 scripts/test_package.py -v
       - name: Critical behavior tests
         run: docker compose exec -T app python -m unittest discover -s tests -v
       - name: Real storage, worker and HTTP acceptance
