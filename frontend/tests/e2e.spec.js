@@ -5,6 +5,7 @@ const os = require('node:os');
 const path = require('node:path');
 
 async function capture(page,options){
+  await expect(page.locator('#toast')).not.toHaveClass(/show/);
   // Full-page captures place fixed elements at the current scroll offset.
   await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
   await page.screenshot(options);
@@ -144,7 +145,9 @@ test('moderator and administrator screens enforce roles and update sessions',asy
     expect((await stranger.request.get('/api/moderation/reports')).status()).toBe(403);
     await capture(page,{path:testInfo.outputPath('admin-desktop.png'),fullPage:true});
     await page.setViewportSize({width:390,height:844});
-    await capture(page,{path:testInfo.outputPath('admin-mobile.png'),fullPage:true});
+    await page.evaluate(()=>window.scrollTo(0,0));
+    await expect(page.locator('.admin-table select').first()).toBeInViewport();
+    await capture(page,{path:testInfo.outputPath('admin-mobile.png'),fullPage:false});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   } finally {await stranger.close();}
 });

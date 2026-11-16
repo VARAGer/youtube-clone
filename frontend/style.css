@@ -3,3 +3,6 @@
 [hidden]{display:none!important}
 
 #nav-overlay{display:none;position:fixed;inset:64px 0 0;border:0;background:#0005;z-index:14} @media(max-width:900px){body.compact #nav-overlay{display:block}} @media(max-width:580px){.brand-group>#menu{display:inline-flex;width:32px;height:36px;padding:6px}.brand-group{gap:3px}.logo strong{font-size:20px}.logo svg{width:26px}.sidebar{top:60px}#nav-overlay{top:60px}}
+
+#toast{visibility:hidden;opacity:0;pointer-events:none}#toast.show{visibility:visible;opacity:1}
+@media(max-width:580px){.admin-table,.admin-table tbody,.admin-table tr,.admin-table td{display:block;width:100%}.admin-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}.admin-table tr{padding:16px 0;border-bottom:1px solid var(--line)}.admin-table td{border:0;padding:6px 0;overflow-wrap:anywhere}.admin-table td:before{content:attr(data-label);display:block;color:var(--muted);font-size:12px;margin-bottom:4px}.admin-table select{width:100%;max-width:100%}}
