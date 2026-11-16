@@ -89,6 +89,29 @@ Documentation, evidence, session provenance and packaging metadata can follow
 this runtime/source commit without changing the tested application code.
 The complete pre-existing Git history is retained; no commits were rewritten.
 
+## Hosted GitHub Actions acceptance
+
+[https://github.com/VARAGer/youtube-clone/actions/runs/43917380384](https://github.com/VARAGer/youtube-clone/actions/runs/43917380384)
+completed **successfully**, attempt 2, for runtime/test/CI source commit
+`ab458a1bd1b7fb66869b049edc1429128cbe5c5a` on `ubuntu-24.04`.
+Every verification step passed: bootstrap/seed, readiness, five packaging
+regressions, API tests, HTTP smoke, real PostgreSQL/worker integration, browser
+dependency installation, actual video fixture, and browser acceptance/screenshots.
+Browser artifacts were uploaded and the stack cleanup succeeded.
+Machine-readable status/step evidence: `docs/evidence/github-actions.json`.
+
+Attempt 1 of that run ended with a BuildKit `EOF` during image-metadata loading,
+before application build steps. The same source passed on one retry. The logs
+do not establish the cause of that isolated builder failure. The earlier
+Ubuntu 26.04/Playwright incompatibility was fixed separately by pinning the
+supported Ubuntu 24.04 runner. Failed attempts remain visible in GitHub history.
+
+Publication used staged fast-forward pushes; original commit IDs, author dates
+and committer dates were compared with GitHub and preserved. The repository is
+public for reviewers. Native session files remain in the complete deliverable
+ZIP; they are not published in the public Git history. This evidence update
+changes documentation only and intentionally skips another application CI run.
+
 ## Fixes found by actual checks
 
 1. Missing S3 objects and deletion between HEAD/GET returned server errors;

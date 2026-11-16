@@ -1,0 +1,91 @@
+{
+  "id": 43917380384,
+  "html_url": "https://github.com/VARAGer/youtube-clone/actions/runs/43917380384",
+  "head_sha": "ab458a1bd1b7fb66869b049edc1429128cbe5c5a",
+  "run_attempt": 2,
+  "status": "completed",
+  "conclusion": "success",
+  "created_at": "2026-11-16T17:20:43Z",
+  "updated_at": "2026-11-16T17:29:13Z",
+  "jobs": [
+    {
+      "id": 133477271681,
+      "html_url": "https://github.com/VARAGer/youtube-clone/actions/runs/43917380384/job/133477271681",
+      "conclusion": "success",
+      "steps": [
+        {
+          "name": "Set up job",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Bootstrap full stack and seed",
+          "conclusion": "success"
+        },
+        {
+          "name": "Verify ready",
+          "conclusion": "success"
+        },
+        {
+          "name": "Native export packaging regressions",
+          "conclusion": "success"
+        },
+        {
+          "name": "Critical behavior tests",
+          "conclusion": "success"
+        },
+        {
+          "name": "Real storage, worker and HTTP acceptance",
+          "conclusion": "success"
+        },
+        {
+          "name": "Real PostgreSQL concurrency and worker recovery",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Install browser test dependencies",
+          "conclusion": "success"
+        },
+        {
+          "name": "Generate a real browser upload fixture",
+          "conclusion": "success"
+        },
+        {
+          "name": "Browser acceptance and screenshots",
+          "conclusion": "success"
+        },
+        {
+          "name": "Run actions/upload-artifact@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Logs on failure",
+          "conclusion": "skipped"
+        },
+        {
+          "name": "Stop stack",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/setup-node@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Post Run actions/checkout@v4",
+          "conclusion": "success"
+        },
+        {
+          "name": "Complete job",
+          "conclusion": "success"
+        }
+      ]
+    }
+  ]
+}
