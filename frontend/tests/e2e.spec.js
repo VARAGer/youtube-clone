@@ -4,6 +4,12 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
+async function capture(page,options){
+  // Full-page captures place fixed elements at the current scroll offset.
+  await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
+  await page.screenshot(options);
+}
+
 // Uses actual backend, database, object storage and ffmpeg worker. No request mocks.
 test('registration → upload → playback → like/comment → privacy and channel', async ({page, browser}, testInfo) => {
   const failures=[];
@@ -50,9 +56,9 @@ test('registration → upload → playback → like/comment → privacy and chan
     await page.getByRole('button',{name:'Отправить',exact:true}).click();
     await expect(page.locator('.comment-body p')).toHaveText('Browser verified comment <script>alert(1)</script>');
     await expect(page.locator('.comment-body script')).toHaveCount(0);
-    await page.screenshot({path:testInfo.outputPath('watch-desktop.png'),fullPage:true});
+    await capture(page,{path:testInfo.outputPath('watch-desktop.png'),fullPage:true});
     await page.setViewportSize({width:390,height:844});
-    await page.screenshot({path:testInfo.outputPath('watch-mobile.png'),fullPage:true});
+    await capture(page,{path:testInfo.outputPath('watch-mobile.png'),fullPage:true});
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
     await page.locator('#menu').click();
     await expect(page.locator('#sidebar').getByRole('link',{name:'Мои видео',exact:true})).toBeVisible();
@@ -61,6 +67,8 @@ test('registration → upload → playback → like/comment → privacy and chan
     await expect(page.locator('#nav-overlay')).not.toBeVisible();
     await page.goto(`/#/watch/${videoId}`);
     await page.setViewportSize({width:1280,height:900});
+    const sidebarRight=await page.locator('#sidebar').evaluate(n=>n.getBoundingClientRect().right);
+    expect(await page.locator('#main').evaluate(n=>n.getBoundingClientRect().left)).toBeGreaterThanOrEqual(sidebarRight);
     await page.getByRole('button',{name:'Изменить',exact:true}).click();
     await page.getByLabel('Доступ',{exact:true}).selectOption('private');
     await page.getByRole('button',{name:'Сохранить',exact:true}).click();
@@ -79,7 +87,7 @@ test('registration → upload → playback → like/comment → privacy and chan
     await page.getByRole('button',{name:'Создать',exact:true}).click();
     await expect(page.getByRole('heading',{name:`Playlist ${unique}`})).toBeVisible();
     await page.goto('/');
-    await page.screenshot({path:testInfo.outputPath('home-desktop.png'),fullPage:true});
+    await capture(page,{path:testInfo.outputPath('home-desktop.png'),fullPage:true});
     await page.getByLabel('Поиск видео',{exact:true}).fill('unlikely-no-video-'+unique);
     await page.getByRole('button',{name:'Найти',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Ничего не найдено'})).toBeVisible();
@@ -94,5 +102,49 @@ test('mobile home has no horizontal overflow',async({page},testInfo)=>{
   await page.setViewportSize({width:390,height:844});await page.goto('/');
   await expect(page.locator('.loading')).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
-  await page.screenshot({path:testInfo.outputPath('home-mobile.png'),fullPage:true});
+  await capture(page,{path:testInfo.outputPath('home-mobile.png'),fullPage:true});
+});
+
+test('moderator and administrator screens enforce roles and update sessions',async({page,browser},testInfo)=>{
+  const demoPassword=process.env.DEMO_PASSWORD||fs.readFileSync(path.join(__dirname,'../../.env'),'utf8').match(/^DEMO_PASSWORD=(.+)$/m)?.[1];
+  expect(demoPassword,'Seeded demo password must be configured').toBeTruthy();
+  const unique=`${Date.now()}-${Math.random().toString(16).slice(2,8)}`;
+  const stranger=await browser.newContext({baseURL:testInfo.project.use.baseURL||process.env.BASE_URL||'http://localhost:8080'});
+  let user;
+  const login=async(email)=>{
+    await page.goto('/');
+    await page.locator('#header-actions').getByRole('button',{name:'Войти'}).click();
+    await page.getByLabel('Электронная почта').fill(email);
+    await page.getByLabel('Пароль',{exact:true}).fill(demoPassword);
+    await page.locator('#dialog').getByRole('button',{name:'Войти',exact:true}).click();
+    await expect(page.locator('#dialog')).not.toBeVisible();
+  };
+  try {
+    const response=await stranger.request.post('/api/auth/register',{data:{email:`roles-${unique}@example.test`,password:'Role-test-9!',display_name:`Role target ${unique}`}});
+    expect(response.ok()).toBe(true);
+    user=await (await stranger.request.get('/api/auth/me')).json();
+    expect((await stranger.request.get('/api/admin/users')).status()).toBe(403);
+    await login('moderator@demo.local');
+    await page.locator('#sidebar').getByRole('link',{name:'Модерация',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Жалобы на видео'})).toBeVisible();
+    await capture(page,{path:testInfo.outputPath('moderation-desktop.png'),fullPage:true});
+    await page.goto('/#/admin');
+    await expect(page.getByRole('heading',{name:'Доступ ограничен'})).toBeVisible();
+    expect((await page.request.get('/api/admin/users')).status()).toBe(403);
+    await page.locator('#sidebar').getByRole('button',{name:'Выйти',exact:true}).click();
+    await login('admin@demo.local');
+    await page.locator('#sidebar').getByRole('link',{name:'Пользователи',exact:true}).click();
+    await expect(page.getByRole('heading',{name:'Управление пользователями'})).toBeVisible();
+    const role=page.getByLabel(`Роль ${user.email}`,{exact:true});
+    await role.selectOption('moderator');
+    await expect.poll(async()=> (await (await stranger.request.get('/api/auth/me')).json()).role).toBe('moderator');
+    expect((await stranger.request.get('/api/moderation/reports')).status()).toBe(200);
+    await role.selectOption('user');
+    await expect.poll(async()=> (await (await stranger.request.get('/api/auth/me')).json()).role).toBe('user');
+    expect((await stranger.request.get('/api/moderation/reports')).status()).toBe(403);
+    await capture(page,{path:testInfo.outputPath('admin-desktop.png'),fullPage:true});
+    await page.setViewportSize({width:390,height:844});
+    await capture(page,{path:testInfo.outputPath('admin-mobile.png'),fullPage:true});
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
+  } finally {await stranger.close();}
 });
