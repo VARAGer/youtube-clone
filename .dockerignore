@@ -1,0 +1,13 @@
+.git
+.env
+.venv
+**/__pycache__
+**/node_modules
+**/.pytest_cache
+**/test-results
+**/playwright-report
+ai-sessions
+backups
+work
+outputs
+frontend/tests/fixture.mp4

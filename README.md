@@ -53,6 +53,31 @@ Backend modules are in `backend/app`, UI in `frontend`, critical tests in `tests
 The native AI-tool session files belong in `ai-sessions/` unchanged. They are not
 replaced by prose summaries, screenshots, or copied messages.
 
+## Verification commands
+
+After deployment, run both the application regression suite and the real
+PostgreSQL/S3/FFmpeg acceptance scenario:
+
+```sh
+docker compose exec -T app python -m unittest discover -s tests -v
+docker compose exec -T app python scripts/smoke.py
+```
+
+Browser tests exercise actual playback and capture desktop/mobile screenshots.
+Install Node.js and FFmpeg on the test machine, then run:
+
+```sh
+cd frontend
+npm install --ignore-scripts
+npx playwright install --with-deps chromium
+BASE_URL=http://localhost:8080 npm test
+```
+
+Alternatively set `E2E_VIDEO` to an existing real MP4 fixture to avoid needing
+FFmpeg on the browser test machine. The CI workflow generates that fixture in
+the app container and executes all three verification stages. Browser results
+are saved in `frontend/test-results` and `frontend/playwright-report`.
+
 ## Submission archive
 
 ```sh
