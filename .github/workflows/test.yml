@@ -16,6 +16,8 @@ jobs:
         run: docker compose exec -T app python -m unittest discover -s tests -v
       - name: Real storage, worker and HTTP acceptance
         run: docker compose exec -T app python scripts/smoke.py
+      - name: Real PostgreSQL concurrency and worker recovery
+        run: docker compose exec -T app python scripts/integration_runtime.py
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

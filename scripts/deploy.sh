@@ -24,6 +24,11 @@ fi
 DOCKER=(docker)
 if ! docker info >/dev/null 2>&1; then DOCKER=(sudo docker); fi
 "${DOCKER[@]}" compose version >/dev/null
+COMPOSE=("${DOCKER[@]}" compose)
+# sudo may drop COMPOSE_PROJECT_NAME; preserve the selected project explicitly.
+if [[ -n ${COMPOSE_PROJECT_NAME:-} ]]; then
+  COMPOSE+=(--project-name "$COMPOSE_PROJECT_NAME")
+fi
 if [[ ! -f .env ]]; then
   umask 077
   DB_SECRET=$(openssl rand -hex 24)
@@ -42,9 +47,9 @@ BIND_ADDRESS=${BIND_ADDRESS:-0.0.0.0}
 DEMO_PASSWORD=$DEMO_SECRET
 ENV
 fi
-"${DOCKER[@]}" compose up -d --build --wait --wait-timeout 300
+"${COMPOSE[@]}" up -d --build --wait --wait-timeout 300
 # The tools profile is excluded from compose up; rebuild seed as well so it
 # never runs an older app environment after a Dockerfile/dependency update.
-"${DOCKER[@]}" compose --profile tools run --rm --build seed
+"${COMPOSE[@]}" --profile tools run --rm --build seed
 printf '\nApplication: http://localhost:%s\nAPI docs: http://localhost:%s/docs\n' "${PORT:-8080}" "${PORT:-8080}"
 printf 'Demo accounts and the generated demo password are documented by the seed output and in .env.\n'
