@@ -29,7 +29,7 @@ docker compose ps
 docker compose logs --tail=100 app worker
 docker compose logs -f worker
 docker compose restart worker
-docker compose --profile tools run --rm seed
+docker compose --profile tools run --rm --build seed
 docker compose down           # preserves named volumes
 ```
 

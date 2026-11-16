@@ -71,7 +71,7 @@ test('registration → upload → playback → like/comment → privacy and chan
     expect(await page.locator('#main').evaluate(n=>n.getBoundingClientRect().left)).toBeGreaterThanOrEqual(sidebarRight);
     await page.getByRole('button',{name:'Изменить',exact:true}).click();
     await page.getByLabel('Доступ',{exact:true}).selectOption('private');
-    await page.getByRole('button',{name:'Сохранить',exact:true}).click();
+    await page.locator('#dialog').getByRole('button',{name:'Сохранить',exact:true}).click();
     await expect(page.locator('#dialog')).not.toBeVisible();
     const stranger=await browser.newContext({baseURL:testInfo.project.use.baseURL||process.env.BASE_URL||'http://localhost:8080'});
     try {
@@ -84,7 +84,7 @@ test('registration → upload → playback → like/comment → privacy and chan
     await page.goto(`/#/channel/${me.id}?tab=playlists`);
     await page.getByRole('button',{name:'Создать плейлист',exact:true}).click();
     await page.getByLabel('Название',{exact:true}).fill(`Playlist ${unique}`);
-    await page.getByRole('button',{name:'Создать',exact:true}).click();
+    await page.locator('#dialog').getByRole('button',{name:'Создать',exact:true}).click();
     await expect(page.getByRole('heading',{name:`Playlist ${unique}`})).toBeVisible();
     await page.goto('/');
     await capture(page,{path:testInfo.outputPath('home-desktop.png'),fullPage:true});

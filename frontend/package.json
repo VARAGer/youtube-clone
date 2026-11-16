@@ -1,6 +1,14 @@
 {
   "name": "youtube-browser-tests",
   "private": true,
-  "scripts": {"test": "playwright test", "test:ui": "playwright test --ui"},
-  "devDependencies": {"@playwright/test": "1.58.2"}
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2"
+  },
+  "engines": {
+    "node": "22.x"
+  }
 }

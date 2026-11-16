@@ -22,7 +22,7 @@ jobs:
       - name: Install browser test dependencies
         working-directory: frontend
         run: |
-          npm install --ignore-scripts
+          npm ci --ignore-scripts
           npx playwright install --with-deps chromium
       - name: Generate a real browser upload fixture
         run: |

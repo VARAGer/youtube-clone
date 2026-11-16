@@ -64,11 +64,11 @@ docker compose exec -T app python scripts/smoke.py
 ```
 
 Browser tests exercise actual playback and capture desktop/mobile screenshots.
-Install Node.js and FFmpeg on the test machine, then run:
+Install Node.js 22 LTS and FFmpeg on the test machine, then run:
 
 ```sh
 cd frontend
-npm install --ignore-scripts
+npm ci --ignore-scripts
 npx playwright install --with-deps chromium
 BASE_URL=http://localhost:8080 npm test
 ```
