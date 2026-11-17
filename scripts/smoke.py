@@ -91,8 +91,14 @@ def main():
             time.sleep(1)
         else:
             raise AssertionError('Worker did not complete within 120 seconds')
+        # Resolve the actual immutable output key rather than assuming its layout.
+        from app.db import SessionLocal
+        from app.models import Video
+        with SessionLocal() as db:
+            media_key = db.get(Video, video_id).media_key
+        check(bool(media_key), 'Ready video has no persisted media object')
         # The backing bucket remains private even for publicly playable videos.
-        for object_path in ('/', f'/media/{video_id}/video.mp4'):
+        for object_path in ('/', '/' + media_key):
             url = os.environ['S3_ENDPOINT'].rstrip('/') + '/' + os.environ.get('S3_BUCKET', 'videos') + object_path
             try:
                 with urllib.request.urlopen(url, timeout=20):

@@ -189,7 +189,13 @@ def edit_video(video_id:int,data:s.VideoEdit,user=Depends(require_user),db:DBSes
     return video_json(db,video,user)
 @app.delete('/api/videos/{video_id}',status_code=204)
 def delete_video(video_id:int,user=Depends(require_user),db:DBSession=Depends(get_db)):
-    video=owned_video(db,video_id,user)
+    owned_video(db,video_id,user)
+    # Use the worker's Job -> Video lock order. Publication must either finish
+    # before this refresh, or observe the cascade deletion after we commit.
+    db.scalar(select(m.Job).where(m.Job.video_id==video_id).with_for_update())
+    video=db.scalar(select(m.Video).where(m.Video.id==video_id).with_for_update().execution_options(populate_existing=True))
+    if not video or video.owner_id!=user.id:
+        raise HTTPException(404,'Video not found')
     storage=get_storage()
     for key in (video.source_key,video.media_key,video.thumbnail_key):
         if key:

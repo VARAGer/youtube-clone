@@ -1,0 +1,27 @@
+test_encoder_maps_validated_video_instead_of_embedded_cover (test_upload_lifecycle.UploadLifecycleTests) ... Video processing failed for video 1 attempt 1
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/backend/app/worker.py", line 67, in process_one
+    run(['ffmpeg','-nostdin','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-i',str(source),'-map','0:v:0','-map','0:a:0?','-sn','-dn','-map_metadata','-1','-vf','scale=1280:720:force_original_aspect_ratio=decrease:force_divisible_by=2','-c:v','libx264','-preset','veryfast','-crf','24','-pix_fmt','yuv420p','-c:a','aac','-b:a','128k','-movflags','+faststart','-threads','2','-y',str(output)],1800)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1179, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 241, in encoder
+    assert command[command.index('-map') + 1] == '0:1', 'Encoder selected cover art instead of validated video'
+AssertionError: Encoder selected cover art instead of validated video
+FAIL
+
+======================================================================
+FAIL: test_encoder_maps_validated_video_instead_of_embedded_cover (test_upload_lifecycle.UploadLifecycleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 247, in test_encoder_maps_validated_video_instead_of_embedded_cover
+    assert db.get(Video, video_id).status == 'ready'
+AssertionError
+
+----------------------------------------------------------------------
+Ran 1 test in 0.052s
+
+FAILED (failures=1)

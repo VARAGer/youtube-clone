@@ -1,0 +1,86 @@
+test_deleted_video_during_processing_does_not_leave_published_objects (test_upload_lifecycle.UploadLifecycleTests) ... ok
+test_processor_failure_sets_failed_state_without_publishing (test_upload_lifecycle.UploadLifecycleTests) ... Video processing failed for video 1
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/backend/app/worker.py", line 39, in process_one
+    probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1173, in _execute_mock_call
+    raise effect
+subprocess.CalledProcessError: Command '['ffprobe']' returned non-zero exit status 1.
+ok
+test_source_cleanup_failure_does_not_unpublish_successful_encode (test_upload_lifecycle.UploadLifecycleTests) ... Failed to clean source for published video 1
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/backend/app/worker.py", line 72, in process_one
+    storage.delete(source_key)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 117, in cleanup
+    raise OSError('temporary cleanup outage')
+OSError: temporary cleanup outage
+ok
+test_stale_failure_cannot_fail_or_delete_replacement_publication (test_upload_lifecycle.UploadLifecycleTests) ... Video processing failed for video 1
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/backend/app/worker.py", line 39, in process_one
+    probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1179, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 156, in encoder
+    raise subprocess.CalledProcessError(1, ['ffprobe'])
+subprocess.CalledProcessError: Command '['ffprobe']' returned non-zero exit status 1.
+FAIL
+test_stale_failure_preserves_source_needed_by_current_attempt (test_upload_lifecycle.UploadLifecycleTests) ... Video processing failed for video 1
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/backend/app/worker.py", line 39, in process_one
+    probe=json.loads(run(['ffprobe','-v','error','-protocol_whitelist','file,pipe','-format_whitelist','mov,matroska,webm,avi,mpegts,mpegvideo,ogg,flv','-show_format','-show_streams','-of','json',str(source)],30).stdout)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1114, in __call__
+    return self._mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1118, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.10/lib/python3.10/unittest/mock.py", line 1179, in _execute_mock_call
+    result = effect(*args, **kwargs)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 191, in fail_after_reclaim
+    raise subprocess.CalledProcessError(1, ['ffprobe'])
+subprocess.CalledProcessError: Command '['ffprobe']' returned non-zero exit status 1.
+FAIL
+test_stale_processing_job_is_reclaimed_and_published_only_after_success (test_upload_lifecycle.UploadLifecycleTests) ... ok
+test_stale_success_cannot_overwrite_replacement_publication (test_upload_lifecycle.UploadLifecycleTests) ... FAIL
+test_streaming_upload_enforces_size_before_database_write (test_upload_lifecycle.UploadLifecycleTests) ... ok
+test_upload_is_queued_and_source_is_never_streamed (test_upload_lifecycle.UploadLifecycleTests) ... ok
+
+======================================================================
+FAIL: test_stale_failure_cannot_fail_or_delete_replacement_publication (test_upload_lifecycle.UploadLifecycleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 179, in test_stale_failure_cannot_fail_or_delete_replacement_publication
+    self._stale_attempt_after_replacement(fail_old_attempt=True)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 166, in _stale_attempt_after_replacement
+    assert (video.status, job.status, job.attempts) == ('ready', 'done', 2)
+AssertionError
+
+======================================================================
+FAIL: test_stale_failure_preserves_source_needed_by_current_attempt (test_upload_lifecycle.UploadLifecycleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 197, in test_stale_failure_preserves_source_needed_by_current_attempt
+    assert (video.status, job.status, job.attempts) == ('processing', 'processing', 2)
+AssertionError
+
+======================================================================
+FAIL: test_stale_success_cannot_overwrite_replacement_publication (test_upload_lifecycle.UploadLifecycleTests)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 176, in test_stale_success_cannot_overwrite_replacement_publication
+    self._stale_attempt_after_replacement(fail_old_attempt=False)
+  File "/Users/aleksandr/Documents/Codex/2026-11-16/youtube-claude-cursor-chatgpt-10-youtube/youtube/tests/test_upload_lifecycle.py", line 169, in _stale_attempt_after_replacement
+    assert storage.path(winner['media_key']).read_bytes() == b'winner-output'
+AssertionError
+
+----------------------------------------------------------------------
+Ran 9 tests in 0.423s
+
+FAILED (failures=3)

@@ -1,0 +1,15 @@
+PASS: PostgreSQL FOR UPDATE SKIP LOCKED skips a locked queue head
+PASS: parallel worker processes claim distinct jobs exactly once; real S3 H.264/JPEG outputs verified
+/app/scripts/integration_runtime.py:224: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, crashed[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: SIGKILL preserves processing claim; fresh lease excluded; expired lease reclaimed by restarted worker
+/app/scripts/integration_runtime.py:241: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, live[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: live SIGSTOP/SIGCONT stale success and failure preserve replacement state and exact S3 publication
+/app/scripts/integration_runtime.py:267: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  db.get(Job, pending[1]).claimed_at = datetime.utcnow() - timedelta(minutes=36)
+PASS: stale failure preserves a live replacement claim and its shared S3 source
+PASS: owner DELETE refreshes and removes concurrently published S3 outputs with PostgreSQL row locks
+PASS: real cover-first MP4 publishes the actual 72-frame H.264 track, AAC and JPEG thumbnail
+PASS: real ffprobe rejects malformed upload, cleans source and never publishes media
+CLEANUP: disposable schema and S3 bucket removed

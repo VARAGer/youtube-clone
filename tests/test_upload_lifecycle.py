@@ -68,7 +68,7 @@ class UploadLifecycleTests(APITestCase):
         def fake_encoder(command, timeout):
             assert self.client.get(f'/api/videos/{video_id}/media').status_code == 404
             if command[0] == 'ffprobe':
-                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"index":0,"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
             Path(command[-1]).write_bytes(b'encoded-fixture')
             return subprocess.CompletedProcess(command, 0, stdout='')
         with patch('app.worker.run', side_effect=fake_encoder):
@@ -90,7 +90,7 @@ class UploadLifecycleTests(APITestCase):
         video_id = response.json()['id']
         def fake_encoder(command, timeout):
             if command[0] == 'ffprobe':
-                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"index":0,"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
             if str(command[-1]).endswith('video.mp4'):
                 assert self.client.delete(f'/api/videos/{video_id}').status_code == 204
             Path(command[-1]).write_bytes(b'encoded-fixture')
@@ -99,8 +99,7 @@ class UploadLifecycleTests(APITestCase):
             assert process_one() is True
         assert self.client.get(f'/api/videos/{video_id}').status_code == 404
         storage = get_storage()
-        assert not storage.path(f'media/{video_id}/video.mp4').exists()
-        assert not storage.path(f'media/{video_id}/thumbnail.jpg').exists()
+        assert not [p for p in storage.path(f'media/{video_id}').rglob('*') if p.is_file()]
         with SessionLocal() as db:
             assert db.scalar(select(Job).where(Job.video_id == video_id)) is None
 
@@ -118,7 +117,7 @@ class UploadLifecycleTests(APITestCase):
             return original_delete(storage, key)
         def fake_encoder(command, timeout):
             if command[0] == 'ffprobe':
-                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"index":0,"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
             Path(command[-1]).write_bytes(b'encoded-fixture')
             return subprocess.CompletedProcess(command, 0, stdout='')
         with patch('app.worker.run', side_effect=fake_encoder), patch.object(LocalStorage, 'delete', cleanup):
@@ -126,4 +125,124 @@ class UploadLifecycleTests(APITestCase):
         with SessionLocal() as db:
             assert db.get(Video, video_id).status == 'ready'
             assert db.scalar(select(Job).where(Job.video_id == video_id)).status == 'done'
+        assert self.client.get(f'/api/videos/{video_id}/media').content == b'encoded-fixture'
+
+    def _stale_attempt_after_replacement(self, fail_old_attempt):
+        """Keep W1 live while a genuinely reclaimed W2 completes its job."""
+        from datetime import datetime, timedelta
+        from pathlib import Path
+        from app.worker import process_one
+        from app.storage import get_storage
+        self.register(self.client)
+        response = self.client.post('/api/videos', data={'title': 'Fenced replacement'}, files={'file': ('v.mp4', b'source', 'video/mp4')})
+        video_id = response.json()['id']
+        replacing = False
+        winner = {}
+        def encoder(command, timeout):
+            nonlocal replacing
+            if command[0] == 'ffprobe':
+                if not replacing:
+                    replacing = True
+                    with SessionLocal() as db:
+                        job = db.scalar(select(Job).where(Job.video_id == video_id))
+                        job.claimed_at = datetime.utcnow() - timedelta(hours=1)
+                        db.commit()
+                    assert process_one() is True
+                    with SessionLocal() as db:
+                        video = db.get(Video, video_id)
+                        winner.update(media_key=video.media_key, thumbnail_key=video.thumbnail_key)
+                    if fail_old_attempt:
+                        raise subprocess.CalledProcessError(1, ['ffprobe'])
+                    replacing = False
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"index":0,"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+            Path(command[-1]).write_bytes(b'winner-output' if replacing else b'obsolete-output')
+            return subprocess.CompletedProcess(command, 0, stdout='')
+        with patch('app.worker.run', side_effect=encoder):
+            assert process_one() is True
+        with SessionLocal() as db:
+            video = db.get(Video, video_id)
+            job = db.scalar(select(Job).where(Job.video_id == video_id))
+            assert (video.status, job.status, job.attempts) == ('ready', 'done', 2)
+            assert (video.media_key, video.thumbnail_key) == (winner['media_key'], winner['thumbnail_key'])
+        storage = get_storage()
+        assert storage.path(winner['media_key']).read_bytes() == b'winner-output'
+        assert storage.path(winner['thumbnail_key']).read_bytes() == b'winner-output'
+        assert self.client.get(f'/api/videos/{video_id}/media').content == b'winner-output'
+        outputs = [p for p in storage.path(f'media/{video_id}').rglob('*') if p.is_file()]
+        assert len(outputs) == 2, 'Obsolete attempt outputs were not cleaned'
+
+    def test_stale_success_cannot_overwrite_replacement_publication(self):
+        self._stale_attempt_after_replacement(fail_old_attempt=False)
+
+    def test_stale_failure_cannot_fail_or_delete_replacement_publication(self):
+        self._stale_attempt_after_replacement(fail_old_attempt=True)
+
+    def test_stale_failure_preserves_source_needed_by_current_attempt(self):
+        from app.worker import process_one
+        from app.storage import get_storage
+        self.register(self.client)
+        video_id = self.client.post('/api/videos', data={'title': 'Current attempt needs source'}, files={'file': ('v.mp4', b'source', 'video/mp4')}).json()['id']
+        def fail_after_reclaim(command, timeout):
+            with SessionLocal() as db:
+                job = db.scalar(select(Job).where(Job.video_id == video_id))
+                job.attempts += 1
+                db.commit()
+            raise subprocess.CalledProcessError(1, ['ffprobe'])
+        with patch('app.worker.run', side_effect=fail_after_reclaim):
+            assert process_one() is True
+        with SessionLocal() as db:
+            video = db.get(Video, video_id)
+            job = db.scalar(select(Job).where(Job.video_id == video_id))
+            assert (video.status, job.status, job.attempts) == ('processing', 'processing', 2)
+            assert get_storage().path(video.source_key).read_bytes() == b'source'
+
+    def test_delete_refreshes_outputs_published_after_initial_owner_lookup(self):
+        """The owner lookup may predate a worker's publication transaction."""
+        from pathlib import Path
+        from app import main
+        from app.worker import process_one
+        from app.storage import get_storage
+        self.register(self.client)
+        video_id = self.client.post('/api/videos', data={'title': 'Delete concurrent publication'}, files={'file': ('v.mp4', b'source', 'video/mp4')}).json()['id']
+        initial_lookup = main.owned_video
+        def publish_after_lookup(db, selected_id, user):
+            video = initial_lookup(db, selected_id, user)
+            assert video.media_key is None
+            assert process_one() is True
+            return video
+        def encoder(command, timeout):
+            if command[0] == 'ffprobe':
+                return subprocess.CompletedProcess(command, 0, stdout='{"streams":[{"index":0,"codec_type":"video","width":320,"height":240}],"format":{"duration":"3"}}')
+            Path(command[-1]).write_bytes(b'encoded-fixture')
+            return subprocess.CompletedProcess(command, 0, stdout='')
+        with patch('app.main.owned_video', side_effect=publish_after_lookup), patch('app.worker.run', side_effect=encoder):
+            assert self.client.delete(f'/api/videos/{video_id}').status_code == 204
+        with SessionLocal() as db:
+            assert db.get(Video, video_id) is None
+            assert db.scalar(select(Job).where(Job.video_id == video_id)) is None
+        assert not [p for p in get_storage().path(f'media/{video_id}').rglob('*') if p.is_file()]
+
+
+    def test_encoder_maps_validated_video_instead_of_embedded_cover(self):
+        import json
+        from pathlib import Path
+        from app.worker import process_one
+        self.register(self.client)
+        video_id = self.client.post('/api/videos', data={'title': 'Embedded cover first'}, files={'file': ('covered.mp4', b'source', 'video/mp4')}).json()['id']
+        def encoder(command, timeout):
+            if command[0] == 'ffprobe':
+                return subprocess.CompletedProcess(command, 0, stdout=json.dumps({
+                    'streams': [
+                        {'index': 0, 'codec_type': 'video', 'width': 100, 'height': 100, 'disposition': {'attached_pic': 1}},
+                        {'index': 1, 'codec_type': 'video', 'width': 320, 'height': 180, 'disposition': {'attached_pic': 0}},
+                        {'index': 2, 'codec_type': 'audio'},
+                    ], 'format': {'duration': '3'}}))
+            if str(command[-1]).endswith('video.mp4'):
+                assert command[command.index('-map') + 1] == '0:1', 'Encoder selected cover art instead of validated video'
+            Path(command[-1]).write_bytes(b'encoded-fixture')
+            return subprocess.CompletedProcess(command, 0, stdout='')
+        with patch('app.worker.run', side_effect=encoder):
+            assert process_one() is True
+        with SessionLocal() as db:
+            assert db.get(Video, video_id).status == 'ready'
         assert self.client.get(f'/api/videos/{video_id}/media').content == b'encoded-fixture'
