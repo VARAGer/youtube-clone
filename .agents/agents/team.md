@@ -20,3 +20,9 @@ Screenshot review agent: 01a1e538-54c1-7243-98da-d87ad18b820d, explicitly gpt-6-
 Agents return changes without committing. Root reviews and creates milestone commits. Root and non-screenshot agents use the inherited session model.
 
 The screenshot review was repeated after fixing watch/sidebar overlap and mobile role administration. Seven final rendered screenshots were inspected with no remaining critical visual findings. Native tool calls and reports belong to the unchanged session snapshots; this file is configuration/documentation, not dialogue.
+
+## Demo continuation on 2026-11-17
+
+Worker/runtime continuation agent: `worker_runtime`, session `01a1ea3d-365c-7d53-ba8d-c0a2da0c56ed`; inherited model, owns worker/DELETE lifecycle and real PostgreSQL/S3/FFmpeg regressions.
+Public HTTPS screenshot reviewer: `demo_screenshot_review`, session `01a1ea4c-dae7-7b92-9e27-60a261ff295f`; explicitly gpt-6-luna, reviews seven actual screenshots and does not edit source.
+Infrastructure agent resumed fixture work and created the validated cover-first MP4 generator. Root owns tunnel/deployment settings, browser tests, Git commits and final packaging. Native snapshots are selected explicitly; generated evidence is not a dialogue export.

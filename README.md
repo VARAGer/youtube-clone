@@ -2,7 +2,11 @@
 
 Source: [https://github.com/VARAGer/youtube-clone](https://github.com/VARAGer/youtube-clone).
 
-Verified on clean Ubuntu 24.04: **36 API tests**, **3 real browser scenarios**,
+Temporary live demo: [https://forest-crm-imagine-downloading.trycloudflare.com](https://forest-crm-imagine-downloading.trycloudflare.com).
+Runs while the Mac and tunnel are online; uploads are limited to 20 MiB.
+See [demo access and lifetime](docs/DEMO.md).
+
+Verified on clean Ubuntu 24.04: **41 API tests**, **3 real browser scenarios**,
 PostgreSQL/S3/FFmpeg lifecycle and concurrency checks, and a complete
 backup/restore with matching database counts and video SHA-256.
 Hosted CI passed: [https://github.com/VARAGer/youtube-clone/actions/runs/43917380384](https://github.com/VARAGer/youtube-clone/actions/runs/43917380384).

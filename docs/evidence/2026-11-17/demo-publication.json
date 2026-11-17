@@ -1,0 +1,15 @@
+{
+  "origin": "https://forest-crm-imagine-downloading.trycloudflare.com",
+  "temporary": true,
+  "provider": "Cloudflare Quick Tunnel",
+  "checked_at_utc": "2026-11-17T16:33:15.838032+00:00",
+  "origin_https_ready": true,
+  "secure_httponly_session_cookie_checked": true,
+  "cross_origin_denied": true,
+  "max_upload_bytes": 20971520,
+  "public_http_smoke": "passed",
+  "browser_scenarios": 3,
+  "browser_seconds": 32.6,
+  "rendered_screenshots_reviewed_by_gpt_6_luna": 7,
+  "lifetime": "While the Mac, Docker VM and cloudflared process are running and connected."
+}

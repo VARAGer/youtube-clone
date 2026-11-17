@@ -11,6 +11,16 @@ async function capture(page,options){
   await page.screenshot(options);
 }
 
+async function waitForHomeCards(page){
+  const cards=page.locator('.video-grid .video-card');
+  await expect(cards.first()).toBeVisible();
+  const count=await cards.count();
+  // Exercise normal scrolling so lazy thumbnails below the viewport load too.
+  await cards.last().scrollIntoViewIfNeeded();
+  await expect.poll(()=>page.locator('.video-grid img').evaluateAll((images,expected)=>images.length===expected&&images.every(i=>i.complete&&i.naturalWidth>0),count)).toBe(true);
+  await page.evaluate(()=>window.scrollTo(0,0));
+}
+
 // Uses actual backend, database, object storage and ffmpeg worker. No request mocks.
 test('registration → upload → playback → like/comment → privacy and channel', async ({page, browser}, testInfo) => {
   const failures=[];
@@ -88,6 +98,7 @@ test('registration → upload → playback → like/comment → privacy and chan
     await page.locator('#dialog').getByRole('button',{name:'Создать',exact:true}).click();
     await expect(page.getByRole('heading',{name:`Playlist ${unique}`})).toBeVisible();
     await page.goto('/');
+    await waitForHomeCards(page);
     await capture(page,{path:testInfo.outputPath('home-desktop.png'),fullPage:true});
     await page.getByLabel('Поиск видео',{exact:true}).fill('unlikely-no-video-'+unique);
     await page.getByRole('button',{name:'Найти',exact:true}).click();
@@ -101,6 +112,7 @@ test('registration → upload → playback → like/comment → privacy and chan
 
 test('mobile home has no horizontal overflow',async({page},testInfo)=>{
   await page.setViewportSize({width:390,height:844});await page.goto('/');
+  await waitForHomeCards(page);
   await expect(page.locator('.loading')).toHaveCount(0);
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true);
   await capture(page,{path:testInfo.outputPath('home-mobile.png'),fullPage:true});
@@ -132,7 +144,11 @@ test('moderator and administrator screens enforce roles and update sessions',asy
     await page.goto('/#/admin');
     await expect(page.getByRole('heading',{name:'Доступ ограничен'})).toBeVisible();
     expect((await page.request.get('/api/admin/users')).status()).toBe(403);
+    const loggedOut=page.waitForResponse(r=>r.url().endsWith('/api/auth/logout')&&r.request().method()==='POST');
     await page.locator('#sidebar').getByRole('button',{name:'Выйти',exact:true}).click();
+    expect((await loggedOut).status()).toBe(204);
+    await expect(page.locator('#header-actions').getByRole('button',{name:'Войти'})).toBeVisible();
+    expect((await page.request.get('/api/auth/me')).status()).toBe(401);
     await login('admin@demo.local');
     await page.locator('#sidebar').getByRole('link',{name:'Пользователи',exact:true}).click();
     await expect(page.getByRole('heading',{name:'Управление пользователями'})).toBeVisible();

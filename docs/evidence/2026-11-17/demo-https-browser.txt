@@ -1,0 +1,17 @@
+
+> test
+> playwright test
+
+
+Running 3 tests using 1 worker
+
+(node:46989) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:46989) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+
+  ✓  1 [chromium] › tests/e2e.spec.js:25:1 › registration → upload → playback → like/comment → privacy and channel (16.3s)
+  ✓  2 [chromium] › tests/e2e.spec.js:113:1 › mobile home has no horizontal overflow (1.6s)
+  ✓  3 [chromium] › tests/e2e.spec.js:121:1 › moderator and administrator screens enforce roles and update sessions (13.6s)
+
+  3 passed (32.6s)

@@ -1,0 +1,4 @@
+PASS: HTTPS login sets Secure, HttpOnly and SameSite=Lax session cookie
+PASS: HTTPS logout revokes session
+PASS: unrelated Origin rejected with 403 (earlier check)
+PASS: .env, .git/HEAD and native session manifest return 404 through public origin
