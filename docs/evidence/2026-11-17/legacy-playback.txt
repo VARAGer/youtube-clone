@@ -1,0 +1,1 @@
+PASS: existing video with legacy deterministic media key still supports real Range playback after fencing update

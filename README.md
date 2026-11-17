@@ -9,7 +9,7 @@ See [demo access and lifetime](docs/DEMO.md).
 Verified on clean Ubuntu 24.04: **41 API tests**, **3 real browser scenarios**,
 PostgreSQL/S3/FFmpeg lifecycle and concurrency checks, and a complete
 backup/restore with matching database counts and video SHA-256.
-Hosted CI passed: [https://github.com/VARAGer/youtube-clone/actions/runs/43917380384](https://github.com/VARAGer/youtube-clone/actions/runs/43917380384).
+Hosted CI passed: [https://github.com/VARAGer/youtube-clone/actions/runs/44127094756](https://github.com/VARAGer/youtube-clone/actions/runs/44127094756).
 See [the executed verification record](docs/verification.md) for scope and evidence.
 
 ![Desktop feed](docs/evidence/screenshots/home-desktop.png)

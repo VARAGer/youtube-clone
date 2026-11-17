@@ -1,7 +1,55 @@
-# Verification record — 2026-11-16
+# Verification record
 
 Only executed checks are recorded as passing. Native dialogue completeness is a
 separate requirement from application verification.
+
+## Latest complete verification — 2026-11-17
+
+- **41 API/unit tests passed** in the updated image (2.396 seconds). The harness
+  isolates application behavior with SQLite/local storage; real services are
+  exercised separately below.
+- Extended real PostgreSQL/S3/FFmpeg acceptance passed: held row lock and
+  concurrent claims; SIGKILL recovery; a live SIGSTOP/SIGCONT old claimant
+  succeeding/failing after replacement publication; preservation of the new
+  claimant's shared source; DELETE racing publication; cover-first MP4; and
+  malformed input rejection. The harness checkpoints real operations and
+  observes real S3 uploads; it does not fabricate encoder/storage responses.
+  Runtime schemas/buckets were removed and absence of leftovers checked.
+- Three old-code regressions first reproduced stale overwrite/failure/source
+  deletion. A cover-first regression also failed before the mapping fix.
+  Workers now fence terminal updates by attempt under a Job row lock and write
+  attempt-specific immutable object keys. DELETE shares the Job → Video lock
+  order and refreshes keys. No DB migration was needed; a real existing video
+  with its legacy key still returned exact Range bytes after the update.
+- A generated valid MP4 exposing JPEG attached_pic as stream 0 and H.264 as
+  stream 1 was rejected by the old `0:v:0` mapping on FFmpeg 7.1.5. Mapping the
+  validated global index published 72 H.264 frames, AAC and a JPEG thumbnail.
+  The fixture generator preserves all media bytes, chunk offsets and track
+  boxes while moving whole metadata boxes before tracks.
+- An isolated `youtube-demo` stack was seeded and exposed through the user's
+  selected free temporary Cloudflare Quick Tunnel. Cookie Secure/HttpOnly/
+  SameSite, HTTPS logout, unrelated-Origin rejection, and 404 for `.env`,
+  `.git/HEAD` and native-export paths were checked through its public origin.
+- **Public HTTPS smoke passed. Three public HTTPS browser scenarios passed in
+  32.6 seconds.** Browser tests now await logout completion and actual loaded
+  home cards/JPEGs, including normal scrolling for lazy images. The initial
+  HTML shows loading status and mobile search uses a short placeholder.
+  GPT-6 Luna reviewed all seven final desktop/mobile PNGs with loaded posters;
+  no critical clipping, overflow or contrast issue remained. Toasts were
+  dismissed before capture; these PNGs do not establish their active appearance.
+- Current hosted CI completed **successfully** for runtime/test/UI source
+  `49f8891d3f45c0b855234727a038377c5595bc07`:
+  [https://github.com/VARAGer/youtube-clone/actions/runs/44127094756](https://github.com/VARAGer/youtube-clone/actions/runs/44127094756).
+  Machine-readable observation: `docs/evidence/2026-11-17/github-demo-ci.json`.
+- A subsequent documentation-only commit records these already executed checks
+  and intentionally skips another application CI run.
+
+Evidence is under `docs/evidence/2026-11-17/`; final reviewed PNGs are in
+`docs/evidence/screenshots/`. Temporary demo access/lifetime is documented in
+`docs/DEMO.md`. The earlier Lima guest developed a shell I/O error on the next
+session; its disk was preserved and stopped. New local runs and the public demo
+use the working dedicated Colima stack. This does not invalidate the historical
+fresh-Ubuntu installation evidence below, but no uninterrupted uptime is claimed.
 
 ## Environments and evidence
 
@@ -69,7 +117,7 @@ separate requirement from application verification.
       that they do not have it. It has not been reconstructed or replaced by
       summaries. Therefore a complete original-dialogue bundle cannot be claimed.
 
-## Final full run
+## 2026-11-16 full run
 
 On the extracted final runtime/source snapshot `fa249b2`, clean Ubuntu:
 **36 API tests passed** in 2.291 seconds; the updated real HTTP smoke passed,
@@ -89,7 +137,7 @@ Documentation, evidence, session provenance and packaging metadata can follow
 this runtime/source commit without changing the tested application code.
 The complete pre-existing Git history is retained; no commits were rewritten.
 
-## Hosted GitHub Actions acceptance
+## 2026-11-16 hosted GitHub Actions acceptance
 
 [https://github.com/VARAGer/youtube-clone/actions/runs/43917380384](https://github.com/VARAGer/youtube-clone/actions/runs/43917380384)
 completed **successfully**, attempt 2, for runtime/test/CI source commit
@@ -171,5 +219,5 @@ in `scripts/verify_restore.py --help`, never on data to retain.
 The old pre-handoff local result was 31 tests on cached, differing dependency
 versions. It is historical context and is superseded by this continuation's
 pinned-container and real-service checks. These checks cover this assignment;
-they do not establish production security, load capacity, x86_64 behavior or
-other Ubuntu releases.
+they do not establish production security, load capacity or coverage of other
+Ubuntu releases beyond the local and hosted environments recorded here.
